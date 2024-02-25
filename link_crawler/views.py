@@ -5,7 +5,6 @@ from django.contrib import messages
 from .models import Link
 from .serializers import LinkSerializer
 import datetime
-import logging
 from django.http import HttpResponse
 from django.views.decorators.http import require_http_methods
 from .models import Link
@@ -19,12 +18,10 @@ import os
 
 
 
-logger = logging.getLogger(__name__)
 
 
 @login_required
 def home(request):
-    logger.info('Request path: %s', request.get_full_path())
     links = Link.objects.all().order_by('-link_created')
     
     # Retrieve filter/search parameters
@@ -57,6 +54,10 @@ def home(request):
 @require_http_methods(["GET", "POST"])
 def add_links(request):
     if request.method == 'POST':
+        if 'fileUpload' not in request.FILES:
+            messages.error(request, "No file uploaded.")
+            return redirect('add_links')
+        
         excel_file = request.FILES.get('fileUpload')
         if not excel_file.name.endswith('.xlsx'):
             messages.error(request, "File is not in the format of a .xlsx")
