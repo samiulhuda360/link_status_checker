@@ -1,0 +1,66 @@
+{% extends "link_crawler/base.html" %}
+
+{% block content%}
+
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-6" style="display: flex; align-items: center; justify-content: center;">
+            <!-- Upload Form -->
+            <form action="{% url 'add_links' %}" method="post" enctype="multipart/form-data" style="padding: 20px; border-radius: 5px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); display: flex; align-items: center;">
+                {% csrf_token %}
+                <label for="fileUpload" style="margin-right: 10px; font-weight: bold;">Choose a file:</label>
+                <input type="file" id="fileUpload" name="fileUpload" style="display: inline-block; margin-right: 10px;">
+                <button type="submit" style="background-color: #4CAF50; color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer;">
+                    Upload
+                </button>
+            </form>
+        </div>
+        <div class="col-md-6" style="display: flex; align-items: center; justify-content: center;">
+            <!-- Download Button -->
+            <a href="{% url 'download_excel_template' %}" style="background-color: #ee5537; color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; text-decoration: none; display: inline-block;">
+                Download Excel Template
+            </a>
+        </div>
+    </div>
+</div>
+
+
+
+<div class="container mt-3">
+    {% if skipped_rows %}
+        <div class="alert alert-warning" role="alert">
+            <h4>Skipped due to duplicates:</h4>
+            <table class="table table-sm table-bordered">
+                <thead>
+                    <tr>
+                        <th scope="col">Data Row No.</th>
+                        <th scope="col">Anchor</th>
+                        <th scope="col">Target Link</th>
+                        <th scope="col">Link To</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for skipped_row in skipped_rows %}
+                        <tr>
+                            <td>{{ skipped_row.row }}</td>
+                            <td>{{ skipped_row.anchor }}</td>
+                            <td>{{ skipped_row.target_link }}</td>
+                            <td>{{ skipped_row.link_to }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% endif %}
+    
+    {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} mt-3" role="alert">
+            {{ message }}
+        </div>
+    {% endfor %}
+</div>
+
+
+
+
+{% endblock %}
