@@ -16,48 +16,59 @@ def normalize_url(url):
     return url.replace('http://', 'https://').replace('www.', '').rstrip('/')
 
 def inspect_links(target_url, link_to, anchor_text):
-    print(link_to)
+    logger.info(f"Inspecting link: {link_to} targeting {target_url} with anchor text '{anchor_text}'")
     proxies = {
         "http": "http://letezcbn-rotate:6792gwkuo8oo@p.webshare.io:80/",
         "https": "http://letezcbn-rotate:6792gwkuo8oo@p.webshare.io:80/"
     }
+    headers = {
+        "User-Agent": "Mozilla/5.0"
+    }
 
     try:
-        result = requests.get(link_to, proxies=proxies)
-        if result.status_code in [404, 400, 500]:
+        result = requests.get(link_to, proxies=proxies, headers=headers, timeout=10)
+        logger.info(f"HTTP Status for {link_to}: {result.status_code}")
+        if result.status_code >= 400:
+            logger.warning(f"Source removed or inaccessible for {link_to} with status code: {result.status_code}")
             return 'Source Removed', datetime.now().date()
 
-        page_content = result.text
-        soup = BeautifulSoup(page_content, 'html.parser')
+        soup = BeautifulSoup(result.text, 'html.parser')
         normalized_target_url = normalize_url(target_url)
         
+        found = False
         for link in soup.find_all('a', href=True):
             href = normalize_url(link['href'])
-            if href == normalized_target_url and link.text.strip().lower() == anchor_text.lower():
-                return ('Nofollow' if 'nofollow' in link.get('rel', '') else 'Dofollow'), datetime.now().date()
-                
-        return 'Link Removed', datetime.now().date()
+            if href == normalized_target_url:
+                link_text = link.text.strip().lower()
+                rel = link.get('rel', [])
+                link_status = 'Nofollow' if 'nofollow' in rel else 'Dofollow'
+                logger.info(f"Link match found: {href} with anchor text '{link_text}' - {link_status}")
+                if link_text == anchor_text.lower():
+                    found = True
+                    break
+                else:
+                    logger.debug(f"Anchor text mismatch: found '{link_text}', expected '{anchor_text.lower()}'")
+        
+        if not found:
+            logger.warning(f"Link not found or anchor text mismatch for target URL {target_url}")
+            return 'Link Removed', datetime.now().date()
+        
+        return link_status, datetime.now().date()
     except Exception as e:
-        return 'Source Removed', datetime.now().date()  # Broad exception for simplicity
+        logger.error(f"Error while inspecting links: {str(e)}")
+        return 'Error', datetime.now().date()
+
 @shared_task
 def crawl_and_update_links():
     logger.info("Starting crawl_and_update_links task")
-    links_to_check = Link.objects.iterator()  # Or filter based on your criteria
+    links_to_check = Link.objects.all()  # Adjust based on your criteria
 
     for link in links_to_check:
         if not link.manual_edit:
-            try:
-                status, last_crawl = inspect_links(
-                    link.target_link,
-                    link.link_to,
-                    link.anchor_text
-                )
-                
-                link.status_of_link = status
-                link.last_crawl_date = last_crawl
-                print(link.status_of_link)
-                link.save()
-                
-            except Exception as e:
-                logger.error(f"Error during task execution: {e}")
-            logger.info("Finished crawl_and_update_links task")
+            status, last_crawl = inspect_links(link.target_link, link.link_to, link.anchor_text)
+            logger.info(f"Updating link {link.link_to} status to {status}")
+            link.status_of_link = status
+            link.last_crawl_date = last_crawl
+            link.save()
+
+    logger.info("Finished crawl_and_update_links task")
