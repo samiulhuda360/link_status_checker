@@ -17,6 +17,6 @@ app.autodiscover_tasks()
 app.conf.beat_schedule = {
     'crawl_and_update_links_daily': {
         'task': 'link_crawler.tasks.crawl_and_update_links',
-        'schedule': crontab(minute='*/30'),
+        'schedule': crontab(minute='*/10'),
     },
 }
