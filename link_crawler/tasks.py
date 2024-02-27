@@ -4,11 +4,13 @@ import requests
 from bs4 import BeautifulSoup
 from django.db.models import Q
 from .models import Link  
-
-import logging
 from celery.utils.log import get_task_logger
 
+
 logger = get_task_logger(__name__)
+
+logger.info('Your log message')
+
 
 
 def normalize_url(url):
