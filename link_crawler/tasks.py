@@ -6,7 +6,8 @@ from django.db.models import Q
 from .models import Link  
 from celery.utils.log import get_task_logger
 from celery import group
-
+from django.utils.timezone import now
+from datetime import timedelta
 
 
 logger = get_task_logger(__name__)
@@ -72,11 +73,16 @@ def crawl_single_link(link_id):
         link.last_crawl_date = last_crawl
         link.save()
 
+two_days_ago = now().date() - timedelta(days=2)
+
 @shared_task
 def crawl_and_update_links():
     logger.info("Starting crawl_and_update_links task")
-    links_to_check = Link.objects.all().values_list('id', flat=True)
-    
+    # Query to fetch links
+    links_to_check = Link.objects.exclude(
+        Q(last_crawl_date__gte=two_days_ago, status_of_link=Link.dofollow)
+    ).values_list('id', flat=True)
+        
     # Create a group of subtasks to process each link independently
     job = group(crawl_single_link.s(link_id) for link_id in links_to_check)
     result = job.apply_async()
