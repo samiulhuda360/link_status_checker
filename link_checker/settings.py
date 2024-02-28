@@ -74,7 +74,7 @@ if IN_PRODUCTION:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
-            'NAME': os.getenv('DB_NAME', 'Linksdb'),
+            'NAME': os.getenv('DB_NAME', 'linksdb'),
             'USER': os.getenv('DB_USER', 'links_user'),
             'PASSWORD': os.getenv('DB_PASSWORD', 'links_user123word'),
             'HOST': os.getenv('DB_HOST', 'localhost'),
