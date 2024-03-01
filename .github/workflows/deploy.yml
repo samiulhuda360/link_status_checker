@@ -22,7 +22,7 @@ jobs:
         password: ${{ secrets.VPS_PASSWORD }}
         port: 22
         script: |
-          cd /var/www/link_checker_CI
+          cd /var/www/link_checker_CI/link_status_checker
           git pull origin main
           docker-compose down
           docker-compose up --build -d
