@@ -13,6 +13,37 @@ body {
 .nav-link:hover {
   color: #ccc !important;
 }
+
+/* Ensure the dropdown is aligned to the right of the form */
+#select-form .text-right .dropdown {
+  display: inline-block;
+}
+
+/* Custom styling for the dropdown button if needed */
+#select-form .dropdown-toggle {
+  background-color: #ffffff;
+  color: #333333;
+  border: 1px solid #cccccc;
+}
+
+/* Add arrow icon to the dropdown button */
+#select-form .dropdown-toggle:after {
+  display: inline-block;
+  margin-left: .255em;
+  vertical-align: .255em;
+  content: "";
+  border-top: .3em solid;
+  border-right: .3em solid transparent;
+  border-bottom: 0;
+  border-left: .3em solid transparent;
+}
+
+.table {
+  width: 100%; /* Ensures the table spans the full width of its container */
+  table-layout: fixed; /* Critical for maintaining column widths */
+  border-collapse: collapse; /* Optional: improves border appearance */
+}
+
 .table thead {
   background: linear-gradient(to right, #903ad2, #a55d2a, #00ffb7);
   color: #fff;
@@ -22,48 +53,44 @@ body {
   border: 0.3px solid #8d320bf2;
   text-shadow: 0px 0px 3px rgba(0,0,0,0.6);
   vertical-align: top;
+  min-width: 120px; /* Ensures a minimum width for all headers */
 }
 
-.table td {
-  max-width: 150px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  }
-
-.table td:hover {
-  overflow: visible;
-  white-space: normal;
-}
-
-.table .thin-column {
-  width: 120px;
-  text-align: center;
-}
-
-.table td.thin-column {
-  padding: 4px 8px; /* Adjust the vertical and horizontal padding as needed */
-}
-
-.table {
-  table-layout: fixed;
+.table th.thin-column {
+  width: 120px; 
 }
 
 .table td, .table th {
   text-overflow: ellipsis;
   white-space: nowrap;
+  overflow: hidden;
+  max-width: 150px; /* Maximum width for table cells */
+}
+
+
+.table td.thin-column {
+  padding: 4px 8px; /* Custom padding for thin column cells */
+}
+
+.table td.no-data {
+  text-align: center;
+  padding: 10px; /* Adjust padding to ensure it looks centered and fills the cell */
+  background-color: var(--table-accent-bg); /* Optional: to match the color styling of other cells */
 }
 
 .table td:hover, .table th:hover {
   z-index: 1;
   position: relative;
   background-color: #fff;
+  overflow: visible;
+  white-space: normal;
 }
 
 .table tr td:nth-last-child(-n+3) {
   padding-left: 4px; 
   padding-right: 4px; 
 }
+
 
 .status-dot {
   height: 10px;

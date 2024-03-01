@@ -51,108 +51,146 @@
     </div>    
 
 
-    <!-- Select and Table Section -->
-    <form id="select-form" method="post" action="">
-        {% csrf_token %}
-        <div class="row mb-3">
-            <div class="col-md-3 align-self-end">
-                <button type="button" class="toggle-select btn btn-info">Select</button>
-            </div>
+<!-- Select and Table Section -->
+<form id="select-form" method="post" action="">
+    {% csrf_token %}
+    <div class="row mb-3">
+        <!-- Select Button aligned to the left -->
+        <div class="col-md-6">
+            <button type="button" class="toggle-select btn btn-info">Select</button>
         </div>
-        <div class="row">
-            <div class="col">
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th scope="col" class="checkbox-column">#</th>
-                            <th scope="col" style="width: 60px;">S.No</th>
-                            <th scope="col">Target Link</th>
-                            <th scope="col">Link To</th>
-                            <th scope="col">Anchor Text</th>
-                            <th scope="col" class="thin-column">Status of Link</th>
-                            <th scope="col" class="thin-column">Link Created</th>
-                            <th scope="col" class="thin-column">Last Crawled</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for link in links %}
-                        <tr>
-                            <td class="checkbox-column"><input type="checkbox" name="selected_links" value="{{ link.id }}"></td>
-                            <th scope="row">{{ forloop.counter }}</th>
-                            <td title="{{ link.target_link }}">{{ link.target_link }}</td>
-                            <td title="{{ link.link_to }}">{{ link.link_to }}</td>
-                            <td>{{ link.anchor_text }}</td>
-                            <td>
-                                {% if link.get_status_of_link_display == "Dofollow" %}
-                                    <span class="status-dot dofollow"></span>Dofollow
-                                {% elif link.get_status_of_link_display == "Nofollow" %}
-                                    <span class="status-dot nofollow"></span>Nofollow
-                                {% elif link.get_status_of_link_display == "Source Removed" %}
-                                    <span class="status-icon">&#9760;</span>Source Removed <!-- Skull symbol -->
-                                {% elif link.get_status_of_link_display == "Link Removed" %}
-                                    <span class="status-icon">&#x1F630;</span>Link Removed <!-- Crying emoji -->
-                                {% else %}
-                                    Status Unknown
-                                {% endif %}
-                            </td>
-                            <td>{{ link.link_created|date:"Y-m-d" }}</td>
-                            <td>
-                                {% if link.last_crawl_date %}
-                                    {{ link.last_crawl_date|date:"Y-m-d" }}
-                                {% else %}
-                                    Not Crawled Yet
-                                {% endif %}
-                            </td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="9">No links found.</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+        <!-- Pagination and Rows per page dropdown aligned to the right -->
+        <div class="col-md-6  d-flex justify-content-end">
+            <!-- Pagination Previous Button -->
+            {% if links.has_previous %}
+                <a href="?page={{ links.previous_page_number }}{% if per_page %}&per_page={{ per_page }}{% endif %}" class="btn btn-outline-secondary me-2">
+                    Previous
+                </a>
+            {% endif %}
+    
+            <!-- Rows per page dropdown -->
+            <div class="btn-group d-inline-block">
+                <label for="dropdownMenuButton" class="form-label">Rows per page:</label>
+                <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                    {{ per_page }}
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton">
+                    <li><a class="dropdown-item" href="?page=1&per_page=20">20</a></li>
+                    <li><a class="dropdown-item" href="?page=1&per_page=50">50</a></li>
+                    <li><a class="dropdown-item" href="?page=1&per_page=100">100</a></li>
+                    <li><a class="dropdown-item" href="?page=1&per_page=200">200</a></li>
+                </ul>
             </div>
+    
+            <!-- Pagination Next Button -->
+            {% if links.has_next %}
+                <a href="?page={{ links.next_page_number }}{% if per_page %}&per_page={{ per_page }}{% endif %}" class="btn btn-outline-secondary ms-2">
+                    Next
+                </a>
+            {% endif %}
         </div>
-        <div class="row mb-3" id="submit-row" style="display: none;">
-            <div class="col-md-4 align-self-end">
-                <button type="submit" class="btn btn-primary">Marked As Addressed</button>
-            </div>
+    </div>
+    
+    <div class="row">
+        <div class="col">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th scope="col" class="checkbox-column" style="width: 50px;">#</th>
+                        <th scope="col" style="width: 60px;">S.No</th>
+                        <th scope="col">Target Link</th>
+                        <th scope="col">Link To</th>
+                        <th scope="col">Anchor Text</th>
+                        <th scope="col" class="thin-column">Status of Link</th>
+                        <th scope="col" class="thin-column">Link Created</th>
+                        <th scope="col" class="thin-column">Last Crawled</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for link in links %}
+                    <tr>
+                        <td class="checkbox-column"><input type="checkbox" name="selected_links" value="{{ link.id }}"></td>
+                        <th scope="row">{{ forloop.counter }}</th>
+                        <td title="{{ link.target_link }}">{{ link.target_link }}</td>
+                        <td title="{{ link.link_to }}">{{ link.link_to }}</td>
+                        <td>{{ link.anchor_text }}</td>
+                        <td>
+                            {% if link.get_status_of_link_display == "Dofollow" %}
+                            <span class="status-dot dofollow"></span>Dofollow
+                            {% elif link.get_status_of_link_display == "Nofollow" %}
+                            <span class="status-dot nofollow"></span>Nofollow
+                            {% elif link.get_status_of_link_display == "Source Removed" %}
+                            <span class="status-icon">&#9760;</span>Source Removed
+                            {% elif link.get_status_of_link_display == "Link Removed" %}
+                            <span class="status-icon">&#x1F630;</span>Link Removed
+                            {% else %}
+                            Status Unknown
+                            {% endif %}
+                        </td>
+                        <td>{{ link.link_created|date:"Y-m-d" }}</td>
+                        <td>
+                            {% if link.last_crawl_date %}
+                            {{ link.last_crawl_date|date:"Y-m-d" }}
+                            {% else %}
+                            Not Crawled Yet
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="no-data">No links found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
-    </form>
+    </div>
+</form>
+
 </div>
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        // Initialize the state to match the CSS
+        // Set initial state for checkbox columns to be hidden
         setInitialState();
     
+        // Event listener for the Select button
         document.querySelector('.toggle-select').addEventListener('click', function() {
-            // Select all elements with the 'checkbox-column' class
-            var elements = document.querySelectorAll('.checkbox-column');
-            // Determine the current display state based on the first element
-            var currentState = elements[0].style.display === 'none' ? 'table-cell' : 'none';
-            
-            // Apply the toggled state to all elements
-            elements.forEach(function(el) {
-                if (el.tagName === 'TD' || el.tagName === 'TH') {
-                    // Table cells and headers should toggle between 'table-cell' and 'none'
-                    el.style.display = currentState;
-                } else {
-                    // Other elements (like the submit-row div) toggle between 'block' and 'none'
-                    el.style.display = currentState === 'none' ? 'none' : 'block';
-                }
-            });
+            toggleCheckboxes();
         });
     
-        function setInitialState() {
-            var elements = document.querySelectorAll('.checkbox-column');
-            elements.forEach(function(el) {
-                el.style.display = 'none'; // Explicitly set the initial state to 'none'
-            });
-            var submitRow = document.getElementById('submit-row');
-            submitRow.style.display = 'none'; // Ensure the submit button row is also hidden initially
-        }
+        // Event listener for the per-page dropdown
+        const perPageDropdown = document.getElementById('dropdownMenuButton');
+        perPageDropdown.addEventListener('click', function (event) {
+            if (event.target.tagName === 'A') {
+                const newPerPage = event.target.textContent;
+                const searchParams = new URLSearchParams(window.location.search);
+                searchParams.set('per_page', newPerPage);
+                searchParams.set('page', 1); // Reset to first page with new per_page
+                window.location.search = searchParams.toString();
+            }
+        });
     });
+    
+    function setInitialState() {
+        var elements = document.querySelectorAll('.checkbox-column');
+        elements.forEach(function(el) {
+            el.style.display = 'none'; // Hide the checkbox columns initially
+        });
+        // If there is any other element that needs to be hidden initially, add here.
+    }
+    
+    function toggleCheckboxes() {
+        var elements = document.querySelectorAll('.checkbox-column');
+        // Determine the current display state based on the first element
+        var currentState = elements[0].style.display === 'none' ? '' : 'none';
+    
+        // Apply the toggled state to all elements
+        elements.forEach(function(el) {
+            el.style.display = currentState;
+        });
+        // Toggle any other specific elements if needed
+    }
 </script>
     
 {% endblock %}
@@ -160,8 +198,3 @@
     
 
 
-<!-- Correct Bootstrap Bundle with Popper.js -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-
-</body>
-</html>

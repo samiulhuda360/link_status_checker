@@ -14,15 +14,14 @@ from datetime import datetime
 from django.contrib.messages import get_messages
 from django.conf import settings
 import os
-
-
-
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 
 
 @login_required
 def home(request):
-    links = Link.objects.all().order_by('-link_created')
+    # Start with the base queryset
+    links_queryset = Link.objects.all().order_by('-link_created')
     
     # Retrieve filter/search parameters
     start_date = request.GET.get('startDate', '').strip()
@@ -35,20 +34,42 @@ def home(request):
         try:
             start_date = datetime.strptime(start_date, "%Y-%m-%d").date()
             end_date = datetime.strptime(end_date, "%Y-%m-%d").date()
-            links = links.filter(link_created__range=[start_date, end_date])
+            links_queryset = links_queryset.filter(link_created__range=[start_date, end_date])
         except ValueError:
             # Handle invalid date format
             pass
 
     # Apply link type filter if provided and not the placeholder
     if link_type and link_type != "Choose...":
-        links = links.filter(status_of_link=link_type)
+        links_queryset = links_queryset.filter(status_of_link=link_type)
 
     # Apply target link search if provided
     if search_target_link:
-        links = links.filter(target_link__icontains=search_target_link)
+        links_queryset = links_queryset.filter(target_link__icontains=search_target_link)
 
-    return render(request, 'link_crawler/home.html', {'links': links})
+    # Get 'per_page' from GET parameters or default to 20, and make sure it's an integer
+    per_page = int(request.GET.get('per_page', 20))
+
+    # Instantiate the Paginator
+    paginator = Paginator(links_queryset, per_page)
+
+    # Get the page number from the request
+    page = request.GET.get('page', 1)
+    try:
+        links = paginator.page(page)
+    except PageNotAnInteger:
+        # If page is not an integer, deliver the first page
+        links = paginator.page(1)
+    except EmptyPage:
+        # If page is out of range, deliver the last page
+        links = paginator.page(paginator.num_pages)
+
+    # Pass the links page object and per_page to the template
+    return render(request, 'link_crawler/home.html', {
+        'links': links,
+        'per_page': per_page,
+        'current_page': int(page)
+    })
 
 
 @require_http_methods(["GET", "POST"])
