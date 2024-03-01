@@ -1,6 +1,6 @@
 body {
   font-family: 'Roboto', sans-serif;
-  font-size: 13px;
+  font-size: 14px;
   background-color: #d2e6d7;
 }
 .navbar-custom {
@@ -20,8 +20,8 @@ body {
 
 .table thead th {
   border: 0.3px solid #8d320bf2;
+  align-items: top;
   text-shadow: 0px 0px 3px rgba(0,0,0,0.6);
-  vertical-align: top;
 }
 
 .table td {
@@ -29,7 +29,7 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  }
+}
 
 .table td:hover {
   overflow: visible;
@@ -37,12 +37,9 @@ body {
 }
 
 .table .thin-column {
-  width: 120px;
+  width: 60px;
+  padding: 0 5px;
   text-align: center;
-}
-
-.table td.thin-column {
-  padding: 4px 8px; /* Adjust the vertical and horizontal padding as needed */
 }
 
 .table {
@@ -60,10 +57,6 @@ body {
   background-color: #fff;
 }
 
-.table tr td:nth-last-child(-n+3) {
-  padding-left: 4px; 
-  padding-right: 4px; 
-}
 
 .status-dot {
   height: 10px;
@@ -82,16 +75,16 @@ body {
 }
 
 .status-icon {
-  font-size: 15px; /* Adjust size as needed */
+  font-size: 20px; /* Adjust size as needed */
   font-weight: 500;
   vertical-align: middle;
-  margin-right: 4px;
+  margin-right: 5px;
   color:red;
 }
 
 .upload-form {
-  padding: 15px;
-  border-radius: 4px;
+  padding: 20px;
+  border-radius: 5px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   display: flex;
   align-items: center;

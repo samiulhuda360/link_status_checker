@@ -20,8 +20,8 @@ body {
 
 .table thead th {
   border: 0.3px solid #8d320bf2;
+  align-items: top;
   text-shadow: 0px 0px 3px rgba(0,0,0,0.6);
-  vertical-align: top;
 }
 
 .table td {
@@ -29,7 +29,7 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  }
+}
 
 .table td:hover {
   overflow: visible;
@@ -37,12 +37,10 @@ body {
 }
 
 .table .thin-column {
-  width: 120px;
+  width: 60px;
+  padding: 0 5px;
+  align-items: top;
   text-align: center;
-}
-
-.table td.thin-column {
-  padding: 4px 8px; /* Adjust the vertical and horizontal padding as needed */
 }
 
 .table {
@@ -60,10 +58,6 @@ body {
   background-color: #fff;
 }
 
-.table tr td:nth-last-child(-n+3) {
-  padding-left: 4px; 
-  padding-right: 4px; 
-}
 
 .status-dot {
   height: 10px;

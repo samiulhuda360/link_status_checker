@@ -1,6 +1,6 @@
 body {
   font-family: 'Roboto', sans-serif;
-  font-size: 14px;
+  font-size: 13px;
   background-color: #d2e6d7;
 }
 .navbar-custom {
@@ -13,7 +13,6 @@ body {
 .nav-link:hover {
   color: #ccc !important;
 }
-
 .table thead {
   background: linear-gradient(to right, #903ad2, #a55d2a, #00ffb7);
   color: #fff;
@@ -21,48 +20,49 @@ body {
 
 .table thead th {
   border: 0.3px solid #8d320bf2;
-  align-items: top;
-  text-shadow: 0px 0px 3px rgba(0,0,0,0.6); /* Improved for better legibility */
+  text-shadow: 0px 0px 3px rgba(0,0,0,0.6);
+  vertical-align: top;
 }
 
-/* New CSS for handling long URLs and making last 3 columns thinner */
 .table td {
+  max-width: 150px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
+  }
 
 .table td:hover {
   overflow: visible;
   white-space: normal;
 }
 
-/* Additional styles for thin columns */
 .table .thin-column {
-  width: 100px; 
-  padding: 0 5px; 
+  width: 120px;
   text-align: center;
-  white-space: nowrap;  
 }
 
-/* Ensuring table layout respects the width settings */
+.table td.thin-column {
+  padding: 4px 8px; /* Adjust the vertical and horizontal padding as needed */
+}
+
 .table {
   table-layout: fixed;
 }
 
-/* Adjusting cell content to fit thin columns */
 .table td, .table th {
-  overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .table td:hover, .table th:hover {
-  overflow: visible;
-  white-space: normal;
   z-index: 1;
-  position: relative; /* Allows content to overflow the cell on hover */
-  background-color: #fff; /* Optional: ensures readability on hover */
+  position: relative;
+  background-color: #fff;
+}
+
+.table tr td:nth-last-child(-n+3) {
+  padding-left: 4px; 
+  padding-right: 4px; 
 }
 
 .status-dot {
@@ -82,16 +82,16 @@ body {
 }
 
 .status-icon {
-  font-size: 20px; /* Adjust size as needed */
+  font-size: 15px; /* Adjust size as needed */
   font-weight: 500;
   vertical-align: middle;
-  margin-right: 5px;
+  margin-right: 4px;
   color:red;
 }
 
 .upload-form {
-  padding: 20px;
-  border-radius: 5px;
+  padding: 15px;
+  border-radius: 4px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   display: flex;
   align-items: center;
