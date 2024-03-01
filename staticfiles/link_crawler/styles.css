@@ -15,18 +15,54 @@ body {
 }
 
 .table thead {
-  background: linear-gradient(to right, #903ad2, #a55d2a, #00ffb7); 
-  color: #fff; 
+  background: linear-gradient(to right, #903ad2, #a55d2a, #00ffb7);
+  color: #fff;
 }
 
 .table thead th {
   border: 0.3px solid #8d320bf2;
   align-items: top;
+  text-shadow: 0px 0px 3px rgba(0,0,0,0.6); /* Improved for better legibility */
 }
 
-/* If you need to make sure the contrast is high, you could add a text shadow for better legibility */
-.table thead th {
-    text-shadow: 0px 0px 3px rgba(0,0,0,0.6);
+/* New CSS for handling long URLs and making last 3 columns thinner */
+.table td {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.table td:hover {
+  overflow: visible;
+  white-space: normal;
+}
+
+/* Additional styles for thin columns */
+.table .thin-column {
+  width: 100px; 
+  padding: 0 5px; 
+  text-align: center;
+  white-space: nowrap;  
+}
+
+/* Ensuring table layout respects the width settings */
+.table {
+  table-layout: fixed;
+}
+
+/* Adjusting cell content to fit thin columns */
+.table td, .table th {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.table td:hover, .table th:hover {
+  overflow: visible;
+  white-space: normal;
+  z-index: 1;
+  position: relative; /* Allows content to overflow the cell on hover */
+  background-color: #fff; /* Optional: ensures readability on hover */
 }
 
 .status-dot {

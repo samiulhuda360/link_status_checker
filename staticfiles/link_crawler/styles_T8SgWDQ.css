@@ -1,0 +1,121 @@
+body {
+  font-family: 'Roboto', sans-serif;
+  font-size: 14px;
+  background-color: #d2e6d7;
+}
+.navbar-custom {
+  background: linear-gradient(45deg, #000, #a52a2a, #ffd700);
+}
+.nav-link {
+  color: #fff !important;
+  transition: color 0.3s ease-in-out;
+}
+.nav-link:hover {
+  color: #ccc !important;
+}
+
+.table thead {
+  background: linear-gradient(to right, #903ad2, #a55d2a, #00ffb7);
+  color: #fff;
+}
+
+.table thead th {
+  border: 0.3px solid #8d320bf2;
+  align-items: top;
+  text-shadow: 0px 0px 3px rgba(0,0,0,0.6); /* Improved for better legibility */
+}
+
+/* New CSS for handling long URLs and making last 3 columns thinner */
+.table td {
+  max-width: 150px; /* Adjust as needed for other columns */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.table td:hover {
+  overflow: visible;
+  white-space: normal;
+}
+
+/* Additional styles for thin columns */
+.table .thin-column {
+  width: 60px; 
+  padding: 0 5px; 
+  text-align: center; 
+}
+
+/* Ensuring table layout respects the width settings */
+.table {
+  table-layout: fixed;
+}
+
+/* Adjusting cell content to fit thin columns */
+.table td, .table th {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.table td:hover, .table th:hover {
+  overflow: visible;
+  white-space: normal;
+  z-index: 1;
+  position: relative; /* Allows content to overflow the cell on hover */
+  background-color: #fff; /* Optional: ensures readability on hover */
+}
+
+.status-dot {
+  height: 10px;
+  width: 10px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 5px;
+}
+
+.dofollow {
+  background-color: green;
+}
+
+.nofollow {
+  background-color: red;
+}
+
+.status-icon {
+  font-size: 20px; /* Adjust size as needed */
+  font-weight: 500;
+  vertical-align: middle;
+  margin-right: 5px;
+  color:red;
+}
+
+.upload-form {
+  padding: 20px;
+  border-radius: 5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+}
+.upload-button {
+  background-color: #4CAF50;
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.download-button {
+  background-color: #FFA500; /* Yellowish-orange */
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+}
+.centered-flex {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

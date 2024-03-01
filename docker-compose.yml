@@ -1,0 +1,72 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:13
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      - IN_PRODUCTION=True
+      - POSTGRES_DB=linksdb
+      - POSTGRES_USER=links_user
+      - POSTGRES_PASSWORD=links_user123word
+  redis:
+    image: "redis:alpine"
+
+  web:
+    build: .
+    command: gunicorn --bind 0.0.0.0:8000 --timeout 120 link_checker.wsgi:application
+    volumes:
+      - .:/app
+      - static_volume:/app/staticfiles
+    depends_on:
+      - db
+      - redis
+    environment:
+      - IN_PRODUCTION=True
+      
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - static_volume:/usr/share/nginx/html/static
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - web
+
+  celery:
+    build: .
+    command: celery -A link_checker worker --loglevel=info
+    volumes:
+      - .:/app
+    depends_on:
+      - web
+      - redis
+    environment:
+      - IN_PRODUCTION=True
+      - DB_NAME=linksdb
+      - DB_USER=links_user
+      - DB_PASSWORD=links_user123word
+      - DB_HOST=db
+      - DB_PORT=5432
+
+  celerybeat:
+    build: .
+    command: celery -A link_checker beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    volumes:
+       - .:/app
+    depends_on:
+      - web
+      - redis
+    environment:
+      - IN_PRODUCTION=True
+      - DB_NAME=linksdb
+      - DB_USER=links_user
+      - DB_PASSWORD=links_user123word
+      - DB_HOST=db
+      - DB_PORT=5432
+
+volumes:
+  postgres_data:
+  static_volume: {}

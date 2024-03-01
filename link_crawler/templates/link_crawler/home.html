@@ -65,13 +65,13 @@
                     <thead>
                         <tr>
                             <th scope="col" class="checkbox-column">#</th>
-                            <th scope="col">S.No</th>
+                            <th scope="col" style="width: 60px;">S.No</th>
                             <th scope="col">Target Link</th>
                             <th scope="col">Link To</th>
                             <th scope="col">Anchor Text</th>
-                            <th scope="col">Status of Link</th>
-                            <th scope="col">Link Created</th>
-                            <th scope="col">Last Crawled</th>
+                            <th scope="col" class="thin-column">Status of Link</th>
+                            <th scope="col" class="thin-column">Link Created</th>
+                            <th scope="col" class="thin-column">Last Crawled</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -79,8 +79,8 @@
                         <tr>
                             <td class="checkbox-column"><input type="checkbox" name="selected_links" value="{{ link.id }}"></td>
                             <th scope="row">{{ forloop.counter }}</th>
-                            <td>{{ link.target_link }}</td>
-                            <td>{{ link.link_to }}</td>
+                            <td title="{{ link.target_link }}">{{ link.target_link }}</td>
+                            <td title="{{ link.link_to }}">{{ link.link_to }}</td>
                             <td>{{ link.anchor_text }}</td>
                             <td>
                                 {% if link.get_status_of_link_display == "Dofollow" %}

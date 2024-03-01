@@ -77,8 +77,8 @@ if IN_PRODUCTION:
             'NAME': os.getenv('DB_NAME', 'linksdb'),
             'USER': os.getenv('DB_USER', 'links_user'),
             'PASSWORD': os.getenv('DB_PASSWORD', 'links_user123word'),
-            'HOST': os.getenv('DB_HOST', 'localhost'),
-            'PORT': os.getenv('DB_PORT', ''),
+            'HOST': os.getenv('DB_HOST', 'db'),
+            'PORT': os.getenv('DB_PORT', '5432'),
         }
     }
     DEBUG = False
@@ -144,8 +144,8 @@ REST_FRAMEWORK = {
     ],
 }
 
-CELERY_BROKER_URL = 'redis://localhost:6379/0' 
-CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+CELERY_BROKER_URL = 'redis://redis:6379/0'
+CELERY_RESULT_BACKEND = 'redis://redis:6379/0'
 
 LOGGING = {
     'version': 1,
@@ -163,7 +163,7 @@ LOGGING = {
             'propagate': True,
         },
         # Add your application logger here
-        'link_crawler': {  # Replace 'my_app' with the name of your Django app
+        'link_crawler': { 
             'handlers': ['console'],
             'level': 'INFO',
         },
