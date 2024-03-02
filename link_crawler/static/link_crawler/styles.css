@@ -38,6 +38,14 @@ body {
   border-left: .3em solid transparent;
 }
 
+.checkbox-column {
+  display: none; /* Default state */
+}
+
+.checkbox-column.is-visible {
+  display: block; /* Or whatever display type is appropriate */
+}
+
 .table {
   width: 100%; /* Ensures the table spans the full width of its container */
   table-layout: fixed; /* Critical for maintaining column widths */
@@ -81,7 +89,7 @@ body {
 .table td:hover, .table th:hover {
   z-index: 1;
   position: relative;
-  background-color: #fff;
+  background-color: #88e921;
   overflow: visible;
   white-space: normal;
 }

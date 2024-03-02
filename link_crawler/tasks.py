@@ -3,7 +3,7 @@ from datetime import datetime
 import requests
 from bs4 import BeautifulSoup
 from django.db.models import Q
-from .models import Link  
+from .models import Link, LinkStatusThreshold
 from celery.utils.log import get_task_logger
 from celery import group
 from django.utils.timezone import now
@@ -60,10 +60,13 @@ def inspect_links(target_url, link_to, anchor_text):
             return 'Link Removed', datetime.now().date()
         
         return link_status, datetime.now().date()
+    except requests.exceptions.ProxyError as e:
+        logger.error(f"Proxy Error while inspecting links: {str(e)}")
+        return 'Source Removed', datetime.now().date()
     except Exception as e:
         logger.error(f"Error while inspecting links: {str(e)}")
         return 'Error', datetime.now().date()
-
+    
 @shared_task
 def crawl_single_link(link_id):
     link = Link.objects.get(id=link_id)
@@ -79,11 +82,26 @@ two_days_ago = now().date() - timedelta(days=2)
 @shared_task
 def crawl_and_update_links():
     logger.info("Starting crawl_and_update_links task")
-    # Query to fetch links
-    links_to_check = Link.objects.exclude(
-        Q(last_crawl_date__gte=two_days_ago, status_of_link=Link.dofollow)
-    ).values_list('id', flat=True)
+    
+    # Fetch thresholds and convert to a dictionary: {status: days_threshold}
+    status_thresholds = {threshold.status: threshold.days_threshold for threshold in LinkStatusThreshold.objects.all()}
+    
+    # Initialize an empty Q object to start building our query
+    query = Q()
+    
+    # Current time for comparison
+    current_time = now()
+    
+    for status, days in status_thresholds.items():
+        # Calculate the threshold date for each status
+        threshold_date = current_time - timedelta(days=days)
         
+        # Update the query to include this status and its threshold
+        query |= Q(last_crawl_date__lt=threshold_date, status_of_link=status)
+    
+    # Fetch links based on the dynamically constructed query
+    links_to_check = Link.objects.filter(query).values_list('id', flat=True)
+    
     # Create a group of subtasks to process each link independently
     job = group(crawl_single_link.s(link_id) for link_id in links_to_check)
     result = job.apply_async()

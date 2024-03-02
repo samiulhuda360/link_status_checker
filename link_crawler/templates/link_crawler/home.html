@@ -96,7 +96,9 @@
             <table class="table">
                 <thead>
                     <tr>
-                        <th scope="col" class="checkbox-column" style="width: 50px;">#</th>
+                        <th scope="col" class="checkbox-column" style="width: 50px;">
+                            <input type="checkbox" id="selectAll" /> 
+                        </th>
                         <th scope="col" style="width: 60px;">S.No</th>
                         <th scope="col">Target Link</th>
                         <th scope="col">Link To</th>
@@ -109,7 +111,7 @@
                 <tbody>
                     {% for link in links %}
                     <tr>
-                        <td class="checkbox-column"><input type="checkbox" name="selected_links" value="{{ link.id }}"></td>
+                        <td class="checkbox-column" style="width: 50px;"><input type="checkbox" name="selected_links" value="{{ link.id }}"></td>
                         <th scope="row">{{ forloop.counter }}</th>
                         <td title="{{ link.target_link }}">{{ link.target_link }}</td>
                         <td title="{{ link.link_to }}">{{ link.link_to }}</td>
@@ -158,6 +160,17 @@
         document.querySelector('.toggle-select').addEventListener('click', function() {
             toggleCheckboxes();
         });
+
+         // Event listener for the "Select All" checkbox
+        document.querySelector('#selectAll').addEventListener('change', function() {
+            var isChecked = this.checked;
+            // Select all checkboxes within the table or form
+            var checkboxes = document.querySelectorAll('.checkbox-column input[type="checkbox"]');
+            
+            checkboxes.forEach(function(checkbox) {
+                checkbox.checked = isChecked;
+            });
+        });
     
         // Event listener for the per-page dropdown
         const perPageDropdown = document.getElementById('dropdownMenuButton');
@@ -182,15 +195,22 @@
     
     function toggleCheckboxes() {
         var elements = document.querySelectorAll('.checkbox-column');
-        // Determine the current display state based on the first element
-        var currentState = elements[0].style.display === 'none' ? '' : 'none';
-    
-        // Apply the toggled state to all elements
+        // Check if elements are currently visible by looking for the 'is-visible' class
+        var isVisible = elements[0].classList.contains('is-visible');
+        
+        // Toggle the class and adjust the display style accordingly
         elements.forEach(function(el) {
-            el.style.display = currentState;
+            if (isVisible) {
+                el.style.display = 'none';
+                el.classList.remove('is-visible');
+            } else {
+                el.style.display = 'table-cell'; // Set to table-cell for proper display in a table
+                el.classList.add('is-visible');
+            }
         });
         // Toggle any other specific elements if needed
     }
+
 </script>
     
 {% endblock %}

@@ -47,3 +47,9 @@ class Link(models.Model):
 
 
   
+class LinkStatusThreshold(models.Model):
+    status = models.CharField(max_length=15, choices=Link.STATUS_CHOICES, unique=True, verbose_name='Link Status')
+    days_threshold = models.IntegerField(default=2, verbose_name='Days Threshold')
+
+    def __str__(self):
+        return f"{self.status}: {self.days_threshold} days"

@@ -2,7 +2,7 @@ from django.contrib import admin
 from rest_framework.authtoken.models import Token
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import User
-from .models import Link
+from .models import Link, LinkStatusThreshold
 
 @admin.register(Link)
 class LinkAdmin(admin.ModelAdmin):
@@ -10,4 +10,5 @@ class LinkAdmin(admin.ModelAdmin):
     list_filter = ('status_of_link', 'link_created')
     search_fields = ('link_to', 'anchor_text')
     ordering = ('-link_created',)
-
+    
+admin.site.register(LinkStatusThreshold)
