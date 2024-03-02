@@ -83,8 +83,10 @@ two_days_ago = now().date() - timedelta(days=2)
 def crawl_and_update_links():
     logger.info("Starting crawl_and_update_links task")
     
-    # Fetch thresholds and convert to a dictionary: {status: days_threshold}
-    status_thresholds = {threshold.status: threshold.days_threshold for threshold in LinkStatusThreshold.objects.all()}
+    # Fetch thresholds and convert to a dictionary: {status: days_threshold}, excluding blank statuses
+    status_thresholds = {
+        threshold.status: threshold.days_threshold for threshold in LinkStatusThreshold.objects.exclude(status='')
+    }
     
     # Initialize an empty Q object to start building our query
     query = Q()
@@ -92,6 +94,7 @@ def crawl_and_update_links():
     # Current time for comparison
     current_time = now()
     
+    # Handle non-blank statuses
     for status, days in status_thresholds.items():
         # Calculate the threshold date for each status
         threshold_date = current_time - timedelta(days=days)
@@ -99,6 +102,9 @@ def crawl_and_update_links():
         # Update the query to include this status and its threshold
         query |= Q(last_crawl_date__lt=threshold_date, status_of_link=status)
     
+    # Additionally, include links where the status_of_link is blank
+    query |= Q(last_crawl_date__lt=current_time, status_of_link='')
+
     # Fetch links based on the dynamically constructed query
     links_to_check = Link.objects.filter(query).values_list('id', flat=True)
     
