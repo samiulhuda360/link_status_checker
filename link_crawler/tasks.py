@@ -107,6 +107,12 @@ def crawl_and_update_links():
 
     # Fetch links based on the dynamically constructed query
     links_to_check = Link.objects.filter(query).values_list('id', flat=True)
+
+    # Correctly fetch 'link_to' fields from links to be checked
+    links_to_check_urls = Link.objects.filter(query).values_list('link_to', flat=True)
+
+    # Log the list of 'link_to' URLs
+    logger.info(f"Links to be checked: {list(links_to_check_urls)}")
     
     # Create a group of subtasks to process each link independently
     job = group(crawl_single_link.s(link_id) for link_id in links_to_check)
