@@ -103,7 +103,7 @@ def crawl_and_update_links():
         query |= Q(last_crawl_date__lt=threshold_date, status_of_link=status)
     
     # Additionally, include links where the status_of_link is blank
-    query |= Q(last_crawl_date__lt=current_time, status_of_link='')
+    query |= Q(last_crawl_date__lt=current_time, status_of_link__in=['', None])
 
     # Fetch links based on the dynamically constructed query
     links_to_check = Link.objects.filter(query).values_list('id', flat=True)
