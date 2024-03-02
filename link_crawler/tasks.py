@@ -111,8 +111,8 @@ def crawl_and_update_links():
 
     # Explicitly include links with a blank or null 'status_of_link'
     links_with_blank_status = Link.objects.filter(
-        Q(status_of_link='') | Q(status_of_link__isnull=True)
-    ).values_list('id', flat=True)
+    Q(status_of_link='') | Q(status_of_link__isnull=True) | Q(status_of_link='Error')
+            ).values_list('id', flat=True)
     
     # Extend the list of links to check
     links_to_check_ids.extend(links_with_blank_status)
