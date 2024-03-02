@@ -21,8 +21,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 @login_required
 def home(request):
     # Start with the base queryset
-    links_queryset = Link.objects.all().order_by('-link_created')
-    
+    links_queryset = Link.objects.filter(user=request.user).order_by('-link_created')    
     # Retrieve filter/search parameters
     start_date = request.GET.get('startDate', '').strip()
     end_date = request.GET.get('endDate', '').strip()
@@ -71,8 +70,8 @@ def home(request):
         'current_page': int(page)
     })
 
-
 @require_http_methods(["GET", "POST"])
+@login_required  # Require the user to be logged in to access this view
 def add_links(request):
     if request.method == 'POST':
         if 'fileUpload' not in request.FILES:
@@ -93,15 +92,15 @@ def add_links(request):
             for index, row in enumerate(sheet.iter_rows(min_row=2, values_only=True), start=2):
                 link_created = datetime(*row[4].timetuple()[:3]) if isinstance(row[4], datetime) else None
 
-                # Check if a record with the same target_link, link_to, and anchor_text exists
+                # Check if a record with the same target_link, link_to, anchor_text, and user exists
                 exists = Link.objects.filter(
                     target_link=row[2],
                     link_to=row[3],
-                    anchor_text=row[1]
+                    anchor_text=row[1],
+                    user=request.user  # Filter by the current user
                 ).exists()
 
                 if exists:
-                    # If a matching record exists, append a description to skipped_rows
                     skipped_rows.append({
                         'row': index-1,
                         'anchor': row[1],
@@ -109,8 +108,8 @@ def add_links(request):
                         'link_to': row[3],
                     })
                 else:
-                    # If no matching record exists, proceed to create a new record
                     Link.objects.create(
+                        user=request.user,  # Set the current user
                         anchor_text=row[1],
                         target_link=row[2],
                         link_to=row[3],
@@ -118,7 +117,7 @@ def add_links(request):
                     )
 
             if skipped_rows:
-                request.session['skipped_rows'] = skipped_rows  # Store skipped_rows in session
+                request.session['skipped_rows'] = skipped_rows
                 messages.warning(request, "Some rows were skipped due to duplicates.")
             else:
                 messages.success(request, "Excel file processed successfully")
@@ -128,10 +127,8 @@ def add_links(request):
 
         return redirect('add_links')
 
-    # Handle GET request: Retrieve skipped_rows from session and clear it
     skipped_rows = request.session.pop('skipped_rows', None)
     return render(request, "link_crawler/add_links.html", {'skipped_rows': skipped_rows})
-
 
 def download_excel_template(request):
     # Define the path to the Excel file

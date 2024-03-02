@@ -89,7 +89,7 @@ body {
 .table td:hover, .table th:hover {
   z-index: 1;
   position: relative;
-  background-color: #88e921;
+  background-color: a6c585;
   overflow: visible;
   white-space: normal;
 }

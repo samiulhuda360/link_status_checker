@@ -83,39 +83,53 @@ two_days_ago = now().date() - timedelta(days=2)
 def crawl_and_update_links():
     logger.info("Starting crawl_and_update_links task")
     
-    # Fetch thresholds and convert to a dictionary: {status: days_threshold}, excluding blank statuses
-    status_thresholds = {
-        threshold.status: threshold.days_threshold for threshold in LinkStatusThreshold.objects.exclude(status='')
+    # Fetch thresholds for non-blank statuses and convert to a dictionary: {status: days_threshold}
+    non_blank_status_thresholds = {
+        threshold.status: threshold.days_threshold 
+        for threshold in LinkStatusThreshold.objects.exclude(status='')
     }
-    
-    # Initialize an empty Q object to start building our query
-    query = Q()
     
     # Current time for comparison
     current_time = now()
     
+    # Initialize an empty list to collect links to check
+    links_to_check_ids = []
+
     # Handle non-blank statuses
-    for status, days in status_thresholds.items():
+    for status, days in non_blank_status_thresholds.items():
         # Calculate the threshold date for each status
         threshold_date = current_time - timedelta(days=days)
         
-        # Update the query to include this status and its threshold
-        query |= Q(last_crawl_date__lt=threshold_date, status_of_link=status)
-    
-    # Include links with a blank or null 'status_of_link', without checking the date
-    query |= Q(status_of_link__in=['', None])
+        # Fetch links that meet the threshold for non-blank statuses
+        links_for_status = Link.objects.filter(
+            last_crawl_date__lt=threshold_date, 
+            status_of_link=status
+        ).values_list('id', flat=True)
+        
+        # Extend the list of links to check
+        links_to_check_ids.extend(links_for_status)
 
-    # Fetch links based on the dynamically constructed query
-    links_to_check = Link.objects.filter(query).values_list('id', flat=True)
-
-    # Fetch 'link_to' fields from links to be checked
-    links_to_check_urls = Link.objects.filter(query).values_list('link_to', flat=True)
-
-    # Log the list of 'link_to' URLs
-    logger.info(f"Links to be checked: {list(links_to_check_urls)}")
+    # Explicitly include links with a blank or null 'status_of_link'
+    links_with_blank_status = Link.objects.filter(
+        Q(status_of_link='') | Q(status_of_link__isnull=True)
+    ).values_list('id', flat=True)
     
-    # Create a group of subtasks to process each link independently
-    job = group(crawl_single_link.s(link_id) for link_id in links_to_check)
-    result = job.apply_async()
-    
+    # Extend the list of links to check
+    links_to_check_ids.extend(links_with_blank_status)
+
+    # Remove potential duplicates
+    links_to_check_ids = list(set(links_to_check_ids))
+
+    # Log the IDs of links to be checked
+    logger.info(f"Total links to be checked: {len(links_to_check_ids)} - IDs: {links_to_check_ids}")
+
+    # If there are links to check, create subtasks
+    if links_to_check_ids:
+        # Create a group of subtasks to process each link independently
+        job = group(crawl_single_link.s(link_id) for link_id in links_to_check_ids)
+        result = job.apply_async()
+        logger.info(f"Scheduled {len(links_to_check_ids)} links for crawling.")
+    else:
+        logger.info("No links to be crawled at this time.")
+
     logger.info("Finished scheduling crawl_and_update_links task")
