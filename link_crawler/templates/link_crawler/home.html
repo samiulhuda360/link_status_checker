@@ -52,12 +52,12 @@
 
 
 <!-- Select and Table Section -->
-<form id="select-form" method="post" action="">
+<form id="select-form" method="post" action="{% url 'handle_actions' %}">
     {% csrf_token %}
     <div class="row mb-3">
         <!-- Select Button aligned to the left -->
         <div class="col-md-6">
-            <button type="button" class="toggle-select btn btn-info">Select</button>
+            <button type="button" class="toggle-select btn btn-info">Select Links</button>
         </div>
         <!-- Pagination and Rows per page dropdown aligned to the right -->
         <div class="col-md-6  d-flex justify-content-end">
@@ -90,6 +90,18 @@
             {% endif %}
         </div>
     </div>
+    <div class="row my-3 additional-actions" style="display: none;">
+        <div class="col-md-3">
+            <select class="form-select" name="action" aria-label="Action Dropdown">
+                <option selected>Select action...</option>
+                <option value="download">Download Selected Links Report</option>
+                <option value="delete">Delete Links</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-primary">Apply</button>
+        </div>
+    </div>
     
     <div class="row">
         <div class="col">
@@ -101,7 +113,7 @@
                         </th>
                         <th scope="col" style="width: 60px;">S.No</th>
                         <th scope="col">Target Link</th>
-                        <th scope="col">Link To</th>
+                        <th scope="col">Referring Page</th>
                         <th scope="col">Anchor Text</th>
                         <th scope="col" class="thin-column">Status of Link</th>
                         <th scope="col" class="thin-column">Link Created</th>
@@ -149,6 +161,14 @@
     </div>
 </form>
 
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert {{ message.tags }}">
+            {{ message }}
+        </div>
+    {% endfor %}
+{% endif %}
+
 </div>
 
 <script>
@@ -186,20 +206,20 @@
     });
     
     function setInitialState() {
-        var elements = document.querySelectorAll('.checkbox-column');
+        var elements = document.querySelectorAll('.checkbox-column, .additional-actions');
         elements.forEach(function(el) {
-            el.style.display = 'none'; // Hide the checkbox columns initially
+            el.style.display = 'none'; // Hide the elements initially
         });
-        // If there is any other element that needs to be hidden initially, add here.
     }
     
     function toggleCheckboxes() {
-        var elements = document.querySelectorAll('.checkbox-column');
+        var checkboxElements = document.querySelectorAll('.checkbox-column');
+        var actionRow = document.querySelector('.additional-actions');
         // Check if elements are currently visible by looking for the 'is-visible' class
-        var isVisible = elements[0].classList.contains('is-visible');
-        
-        // Toggle the class and adjust the display style accordingly
-        elements.forEach(function(el) {
+        var isVisible = checkboxElements[0].classList.contains('is-visible');
+    
+        // Toggle the class and adjust the display style accordingly for checkbox columns
+        checkboxElements.forEach(function(el) {
             if (isVisible) {
                 el.style.display = 'none';
                 el.classList.remove('is-visible');
@@ -208,7 +228,13 @@
                 el.classList.add('is-visible');
             }
         });
-        // Toggle any other specific elements if needed
+    
+        // Toggle the display style for the additional actions row
+        if (isVisible) {
+            actionRow.style.display = 'none'; // Hide the additional actions row if checkboxes were visible
+        } else {
+            actionRow.style.display = 'flex'; // Show the additional actions row if checkboxes were hidden
+        }
     }
 
 </script>

@@ -1,11 +1,12 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
+from openpyxl import Workbook
 from rest_framework import viewsets
 from django.contrib import messages
 from .models import Link
 from .serializers import LinkSerializer
 import datetime
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.views.decorators.http import require_http_methods
 from .models import Link
 from django.utils.dateparse import parse_date
@@ -15,6 +16,7 @@ from django.contrib.messages import get_messages
 from django.conf import settings
 import os
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.urls import reverse
 
 
 
@@ -69,6 +71,76 @@ def home(request):
         'per_page': per_page,
         'current_page': int(page)
     })
+
+@login_required
+def handle_actions(request):
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        selected_ids = request.POST.getlist('selected_links')
+
+        if action == 'download':
+            # Assuming this function returns an HttpResponse object
+            return download_status_report(request, selected_ids)
+        elif action == 'delete':
+            # Assuming this function performs deletion and then returns an HttpResponse object
+            return delete_links(request, selected_ids)
+        else:
+            # If the action is not recognized, redirect to a default page or show an error message
+            return HttpResponseRedirect(reverse('home'))
+
+    # If the request method is not POST, redirect to a default page or show an error message
+    return HttpResponseRedirect(reverse('home'))
+
+def download_status_report(request, selected_links_ids):
+    # Create a new Excel workbook and select the active worksheet
+    wb = Workbook()
+    ws = wb.active
+
+    # Define the title of the worksheet
+    ws.title = "Links Status Report"
+
+    # Set the header row
+    headers = ['Target Link', 'Referring Domain', 'Anchor', 'Status Of Link', 'Is Index', 'Link Created', 'Last Crawled']
+    ws.append(headers)
+    # Fetch the selected links from the database
+    selected_links = Link.objects.filter(id__in=selected_links_ids)
+
+    # Iterate over the queryset and append rows to the worksheet
+    for link in selected_links:
+        if link.index_status == Link.index:
+            is_index = 'Yes' 
+        elif link.index_status == Link.not_index:
+            is_index = 'No' 
+        else:
+            is_index = 'Unknown' 
+        # Prepare row with handling of potential blank values
+        row = [
+            link.target_link or '',  # Empty string if None
+            link.link_to or '',  # Empty string if None
+            link.anchor_text or '',  # Empty string if None
+            link.get_status_of_link_display() or '',  # Empty string if None
+            is_index,
+            link.link_created.strftime('%Y-%m-%d') if link.link_created else '',
+            link.last_crawl_date.strftime('%Y-%m-%d') if link.last_crawl_date else '',
+        ]
+        ws.append(row)
+
+    # Set the HTTP response with a file attachment
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = 'attachment; filename=links_status_report.xlsx'
+
+    # Save the workbook to the response
+    wb.save(response)
+
+    return response
+
+def delete_links(request, selected_links_ids):
+    links_to_delete = Link.objects.filter(id__in=selected_links_ids)
+    count = links_to_delete.count()
+    links_to_delete.delete()
+
+    messages.success(request, f'Deleted {count} links successfully.')
+    return HttpResponseRedirect(reverse('home'))
 
 @require_http_methods(["GET", "POST"])
 @login_required  # Require the user to be logged in to access this view

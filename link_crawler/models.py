@@ -36,6 +36,9 @@ class Link(models.Model):
         max_length=11, 
         choices=INDEX_CHOICE,
         verbose_name='Index Status', blank=True, null=True)
+    
+    last_index_check = models.DateField(verbose_name='Last Index Check', null=True, blank=True)
+
 
     issue_addressed = models.BooleanField(verbose_name='Issue Addressed', blank=True, null=True)
     last_crawl_date = models.DateField(verbose_name='Last Crawl Date', null=True, blank=True)
