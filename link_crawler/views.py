@@ -17,6 +17,8 @@ from django.conf import settings
 import os
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.urls import reverse
+from django.utils.timezone import now
+
 
 
 
@@ -28,6 +30,9 @@ def home(request):
     start_date = request.GET.get('startDate', '').strip()
     end_date = request.GET.get('endDate', '').strip()
     link_type = request.GET.get('linkType', '').strip()
+    index_status = request.GET.get('index_status', '').strip()
+    print("Index status:",index_status)
+
     search_target_link = request.GET.get('searchTargetLink', '').strip()
 
     # Apply date range filter if both dates are provided
@@ -43,11 +48,15 @@ def home(request):
     # Apply link type filter if provided and not the placeholder
     if link_type and link_type != "Choose...":
         links_queryset = links_queryset.filter(status_of_link=link_type)
+    
+    if index_status and index_status != "Choose...":
+        links_queryset = links_queryset.filter(index_status=index_status)
 
     # Apply target link search if provided
     if search_target_link:
         links_queryset = links_queryset.filter(target_link__icontains=search_target_link)
-
+        
+    total_links = links_queryset.count()
     # Get 'per_page' from GET parameters or default to 20, and make sure it's an integer
     per_page = int(request.GET.get('per_page', 20))
 
@@ -65,25 +74,29 @@ def home(request):
         # If page is out of range, deliver the last page
         links = paginator.page(paginator.num_pages)
 
-    # Pass the links page object and per_page to the template
     return render(request, 'link_crawler/home.html', {
         'links': links,
         'per_page': per_page,
-        'current_page': int(page)
+        'current_page': int(page),
+        'total_links': total_links, 
     })
-
+    
+    
 @login_required
 def handle_actions(request):
     if request.method == 'POST':
         action = request.POST.get('action')
+        print(action)
         selected_ids = request.POST.getlist('selected_links')
 
         if action == 'download':
-            # Assuming this function returns an HttpResponse object
+            # Assuming download_status_report returns an HttpResponse object
             return download_status_report(request, selected_ids)
         elif action == 'delete':
-            # Assuming this function performs deletion and then returns an HttpResponse object
+            # Assuming delete_links performs deletion and then returns an HttpResponse object
             return delete_links(request, selected_ids)
+        elif action == 'mark_addressed':
+            return mark_links_as_addressed(request, selected_ids)
         else:
             # If the action is not recognized, redirect to a default page or show an error message
             return HttpResponseRedirect(reverse('home'))
@@ -141,6 +154,64 @@ def delete_links(request, selected_links_ids):
 
     messages.success(request, f'Deleted {count} links successfully.')
     return HttpResponseRedirect(reverse('home'))
+
+def mark_links_as_addressed(request, selected_links_ids):
+    updated_count = Link.objects.filter(id__in=selected_links_ids).update(address_status='addressed')
+
+    # Provide feedback to the user
+    messages.success(request, f'Marked {updated_count} links as addressed successfully.')
+
+    # Redirect to home or another success page
+    return HttpResponseRedirect(reverse('home'))
+
+
+class LinkViewSet(viewsets.ModelViewSet):
+    queryset = Link.objects.all()
+    serializer_class = LinkSerializer
+
+
+
+def download_report(request):
+    # Create a new Excel workbook and select the active worksheet
+    wb = Workbook()
+    ws = wb.active
+
+    # Set the title for the worksheet
+    ws.title = "Links Report"
+
+    # Set the header row
+    headers = ['Target Link', 'Link To', 'Anchor Text', 'Status Of Link', 'Index Status', 'Link Created', 'Last Crawl Date']
+    ws.append(headers)
+
+    # Retrieve the links based on the user's selection or all links
+    # Here, you may add filtering based on request parameters
+    links = Link.objects.all()
+
+    for link in links:
+        # Prepare the data row for each link
+        data_row = [
+            link.target_link,
+            link.link_to,
+            link.anchor_text,
+            link.get_status_of_link_display(),  # This will fetch the human-readable value for the 'status_of_link' choice
+            link.get_index_status_display(),    # Similarly, this fetches the readable value for 'index_status'
+            link.link_created.strftime('%Y-%m-%d') if link.link_created else 'N/A',
+            link.last_crawl_date.strftime('%Y-%m-%d') if link.last_crawl_date else 'N/A',
+        ]
+        ws.append(data_row)
+
+    # Set the name of the Excel file
+    filename = f"Links_Report_{now().strftime('%Y-%m-%d')}.xlsx"
+
+    # Create a HTTP response with content type as Excel
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    # Set the content disposition to attachment to force download
+    response['Content-Disposition'] = f'attachment; filename={filename}'
+
+    # Save the Excel file to the response
+    wb.save(response)
+
+    return response
 
 @require_http_methods(["GET", "POST"])
 @login_required  # Require the user to be logged in to access this view
@@ -216,10 +287,3 @@ def download_excel_template(request):
         # You can return an HTTP 404 response if the file is not found
         # Or handle it some other way if you prefer
         return HttpResponse("The requested Excel template was not found.", status=404)
-
-class LinkViewSet(viewsets.ModelViewSet):
-    queryset = Link.objects.all()
-    serializer_class = LinkSerializer
-
-
-

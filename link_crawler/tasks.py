@@ -3,17 +3,16 @@ from datetime import datetime
 import requests
 from bs4 import BeautifulSoup
 from django.db.models import Q
-from .models import Link, LinkStatusThreshold
+from .models import Link, LinkStatusThreshold, Index_checker_api
 from celery.utils.log import get_task_logger
 from celery import group
 from django.utils.timezone import now
 from datetime import timedelta
+from django.core.cache import cache
+import time
 
 
 logger = get_task_logger(__name__)
-
-logger.info('Your log message')
-
 
 
 def normalize_url(url):
@@ -72,11 +71,17 @@ def crawl_single_link(link_id):
     link = Link.objects.get(id=link_id)
     if not link.manual_edit:
         status, last_crawl = inspect_links(link.target_link, link.link_to, link.anchor_text)
-        logger.info(f"Updating link {link.link_to} status to {status}")
+        logger.info(f"Updating link {link.link_to} status to {status} and crawl date to {last_crawl}")
+        
         link.status_of_link = status
         link.last_crawl_date = last_crawl
+        
+        # If the link status is 'Dofollow', update 'address_status' to 'Blank'
+        if status == 'Dofollow':
+            link.address_status = '-'
+        
         link.save()
-
+        
 two_days_ago = now().date() - timedelta(days=2)
 
 @shared_task
@@ -133,3 +138,69 @@ def crawl_and_update_links():
         logger.info("No links to be crawled at this time.")
 
     logger.info("Finished scheduling crawl_and_update_links task")
+    
+    
+@shared_task
+def check_url_index():
+    logger.info("Index Checker Task Started")  # Task start log
+
+    api_key = cache.get('index_checker_api_key')
+    if not api_key:
+        try:
+            api_key_instance = Index_checker_api.objects.first()
+            if api_key_instance:
+                api_key = api_key_instance.key
+                cache.set('index_checker_api_key', api_key, 3600)
+                logger.info("API key fetched from database and stored in cache.")
+            else:
+                logger.error("API Key is not set in the database.")
+                raise ValueError("API Key is not set in the database.")
+        except Index_checker_api.DoesNotExist:
+            logger.error("API Key model does not exist in the database.")
+            raise ValueError("API Key is not set in the database.")
+    
+    # Fetching the index check interval
+    try:
+        interval_entry = LinkStatusThreshold.objects.get(status="Index_Check_Interval")
+        days_threshold = interval_entry.days_threshold
+        logger.info(f"Index check interval set to {days_threshold} days.")
+    except LinkStatusThreshold.DoesNotExist:
+        days_threshold = 10  # Default value if not set
+        logger.info("Index_Check_Interval not found. Defaulting to 10 days.")
+
+    threshold_date = now() - timedelta(days=days_threshold)
+    links_to_check = Link.objects.filter(last_index_check__lt=threshold_date) | Link.objects.filter(last_index_check__isnull=True)
+
+    logger.info(f"Total links to check: {links_to_check.count()}")
+
+    for link in links_to_check:
+        encoded_target_url = requests.utils.quote(link.link_to, safe='')
+        search_query = f"site:{encoded_target_url}"
+        api_endpoint = f"https://scraping.narf.ai/api/v1/?api_key={api_key}&url=https://www.google.co.uk/search?q={search_query}"
+
+        logger.info(f"Checking index status for URL: {link.link_to}")
+
+        response = requests.get(api_endpoint)
+
+        if response.status_code == 200:
+            soup = BeautifulSoup(response.text, 'html.parser')
+            search_div = soup.find('div', id='search')
+
+            if search_div and any(link.link_to in a_tag['href'] for a_tag in search_div.find_all('a', href=True)):
+                link.index_status = Link.index  # Mark as 'Indexed'
+                logger.info(f"URL indexed: {link.link_to}")
+            else:
+                link.index_status = Link.not_index  # Mark as 'Not Indexed'
+                logger.info(f"URL not indexed: {link.link_to}")
+
+            link.last_index_check = now()
+        else:
+            link.index_status = Link.not_index  # Default if error occurs
+            logger.error(f"Failed to check index status for URL: {link.link_to}. Response status: {response.status_code}")
+            link.last_index_check = now()
+
+        link.save()
+        logger.info("Link status updated and saved.")
+        time.sleep(10)  # Pause to avoid overwhelming the server or hitting rate limits
+
+    logger.info("Index Checker Task Completed")

@@ -12,6 +12,7 @@ services:
       - POSTGRES_PASSWORD=links_user123word
   redis:
     image: "redis:alpine"
+    command: redis-server --maxmemory 300mb --maxmemory-policy allkeys-lru
 
   web:
     build: .

@@ -19,4 +19,8 @@ app.conf.beat_schedule = {
         'task': 'link_crawler.tasks.crawl_and_update_links',
         'schedule': crontab(minute='*/30'),
     },
+    'check_url_index_daily': { 
+        'task': 'link_crawler.tasks.check_url_index', 
+        'schedule': crontab(minute='*/600'),
+    },
 }

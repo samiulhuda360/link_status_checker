@@ -9,12 +9,12 @@
             <h4>Filters</h4>
             <form class="row g-3" method="get" action="{% url 'home' %}">
                 <!-- Start Date Filter -->
-                <div class="col-md-3">
+                <div class="col-md-2">
                     <label for="startDate" class="form-label">Start Date</label>
                     <input type="date" class="form-control" id="startDate" name="startDate" value="{{ request.GET.startDate }}">
                 </div>
                 <!-- End Date Filter -->
-                <div class="col-md-3">
+                <div class="col-md-2">
                     <label for="endDate" class="form-label">End Date</label>
                     <input type="date" class="form-control" id="endDate" name="endDate" value="{{ request.GET.endDate }}">
                 </div>
@@ -25,12 +25,20 @@
                         <option value="Choose..." {% if request.GET.linkType == "" or not request.GET.linkType %}selected{% endif %}>Choose...</option>
                         <option value="Dofollow" {% if request.GET.linkType == "Dofollow" %}selected{% endif %}>Dofollow</option>
                         <option value="Nofollow" {% if request.GET.linkType == "Nofollow" %}selected{% endif %}>Nofollow</option>
-                        <option value="Source Removed" {% if request.GET.linkType == "Source Removed" %}selected{% endif %}>Source Removed</option>
+                        <option value="Source Removed" {% if request.GET.linkType == "Source Removed" %}selected{% endif %}>404</option>
                         <option value="Link Removed" {% if request.GET.linkType == "Link Removed" %}selected{% endif %}>Link Removed</option>
                     </select>
                 </div>
+                <div class="col-md-2">
+                    <label for="indexstatus" class="form-label">Index Status</label>
+                    <select id="index_status" class="form-select" name="index_status">
+                        <option value="Choose..." {% if request.GET.index_status == "" or not request.GET.index_status %}selected{% endif %}>Choose...</option>
+                        <option value="Index" {% if request.GET.index_status == "Index" %}selected{% endif %}>Indexed</option>
+                        <option value="Not Index" {% if request.GET.index_status == "Not Index" %}selected{% endif %}>Not Indexed</option>
+                    </select>
+                </div>
                 <!-- Filter Button -->
-                <div class="col-md-3 align-self-end">
+                <div class="col-md-2 align-self-end">
                     <button type="submit" class="btn btn-info">Filter</button>
                 </div>
             </form>
@@ -48,7 +56,35 @@
                 </div>
             </form>
         </div>
-    </div>    
+    </div>
+
+    <!-- Seperator line -->
+    <div class="row mb-2">
+        <div class="col-md-12">
+            <hr style="border-top: 2px solid #464444; margin-top: 0px; margin-bottom: 20px;">
+        </div>
+    </div>
+
+    <div class="row mb-2">
+        <div class="col-md-5">
+            <form method="get" action="{% url 'download_report' %}">
+                <div class="input-group mb-3">
+                    <select id="reportType" name="report_type" class="form-select">
+                        <option value="">Select a report type to download...</option>
+                        <option value="dofollow">Download All Dofollow Links</option>
+                        <option value="nofollow">Download All Nofollow Links</option>
+                        <option value="link_removed">Download All Link Removed Links</option>
+                        <option value="source_removed">Download All 404 Links</option>
+                        <option value="indexed">Download All Indexed Links</option>
+                        <option value="not_indexed">Download All Not Indexed Links</option>
+                    </select>
+                    <button type="submit" class="btn btn-success ms-2">Download Report</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    
 
 
 <!-- Select and Table Section -->
@@ -96,13 +132,18 @@
                 <option selected>Select action...</option>
                 <option value="download">Download Selected Links Report</option>
                 <option value="delete">Delete Links</option>
+                <option value="mark_addressed">Mark Addressed</option>
             </select>
         </div>
         <div class="col-md-2">
             <button type="submit" class="btn btn-primary">Apply</button>
         </div>
     </div>
-    
+
+    <div class="col text-end"> 
+            <p class="me-3"><strong>Total Links:</strong> {{ total_links }}</p>
+    </div>
+
     <div class="row">
         <div class="col">
             <table class="table">
@@ -118,6 +159,8 @@
                         <th scope="col" class="thin-column">Status of Link</th>
                         <th scope="col" class="thin-column">Link Created</th>
                         <th scope="col" class="thin-column">Last Crawled</th>
+                        <th scope="col" class="thin-column">Is Indexed?</th>
+                        <th scope="col" class="thin-column">Addressed?</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -130,11 +173,11 @@
                         <td>{{ link.anchor_text }}</td>
                         <td>
                             {% if link.get_status_of_link_display == "Dofollow" %}
-                            <span class="status-dot dofollow"></span>Dofollow
+                            <span class="status-dot green-dot"></span>Dofollow
                             {% elif link.get_status_of_link_display == "Nofollow" %}
-                            <span class="status-dot nofollow"></span>Nofollow
+                            <span class="status-dot red-dot"></span>Nofollow
                             {% elif link.get_status_of_link_display == "Source Removed" %}
-                            <span class="status-icon">&#9760;</span>Source Removed
+                            <span class="status-icon">&#9760;</span>404
                             {% elif link.get_status_of_link_display == "Link Removed" %}
                             <span class="status-icon">&#x1F630;</span>Link Removed
                             {% else %}
@@ -149,7 +192,23 @@
                             Not Crawled Yet
                             {% endif %}
                         </td>
-                    </tr>
+                        <td>
+                            {% if link.index_status == link.index %}
+                            <span class="status-dot green-dot" style="color: red;"></span>Indexed
+                            {% elif link.index_status == link.not_index %}
+                            <span class="status-dot red-dot" style="color: red;"></span>Not Indexed
+                            {% else %}
+                            Not Checked
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if link.address_status == "-" %}
+                            -
+                            {% else %}
+                            Addressed
+                            {% endif %}
+                        </td>                     
+                    </tr>                    
                     {% empty %}
                     <tr>
                         <td colspan="8" class="no-data">No links found.</td>

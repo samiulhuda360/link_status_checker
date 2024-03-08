@@ -108,11 +108,11 @@ body {
   margin-right: 5px;
 }
 
-.dofollow {
+.green-dot {
   background-color: green;
 }
 
-.nofollow {
+.red-dot {
   background-color: red;
 }
 

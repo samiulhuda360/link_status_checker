@@ -12,6 +12,7 @@ urlpatterns = [
     path('', views.home, name='home'),
     path('add-links', views.add_links, name='add_links'),
     path('api/', include(router.urls)),
+    path('download_report/', views.download_report, name='download_report'),
     path('download-excel-template/', views.download_excel_template, name='download_excel_template'),
     path('handle-actions/', views.handle_actions, name='handle_actions'),
     path('logout/', LogoutView.as_view(next_page='home'), name='logout'),
