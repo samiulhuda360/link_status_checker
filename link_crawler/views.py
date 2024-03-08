@@ -170,7 +170,7 @@ class LinkViewSet(viewsets.ModelViewSet):
     serializer_class = LinkSerializer
 
 
-
+@login_required
 def download_report(request):
     # Create a new Excel workbook and select the active worksheet
     wb = Workbook()
@@ -273,6 +273,7 @@ def add_links(request):
     skipped_rows = request.session.pop('skipped_rows', None)
     return render(request, "link_crawler/add_links.html", {'skipped_rows': skipped_rows})
 
+@login_required
 def download_excel_template(request):
     # Define the path to the Excel file
     file_path = os.path.join(settings.BASE_DIR, 'links_upload_format.xlsx')
