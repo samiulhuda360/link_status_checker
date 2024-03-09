@@ -150,6 +150,8 @@ CELERY_RESULT_BACKEND = 'redis://redis:6379/0'
 CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_SECURE = True
 
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
