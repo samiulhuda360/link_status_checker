@@ -6,7 +6,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     environment:
-      - IN_PRODUCTION=True
+      - IN_PRODUCTION=False
       - POSTGRES_DB=linksdb
       - POSTGRES_USER=links_user
       - POSTGRES_PASSWORD=links_user123word
@@ -24,7 +24,7 @@ services:
       - db
       - redis
     environment:
-      - IN_PRODUCTION=True
+      - IN_PRODUCTION=False
       
   nginx:
     image: nginx:alpine
@@ -46,7 +46,7 @@ services:
       - web
       - redis
     environment:
-      - IN_PRODUCTION=True
+      - IN_PRODUCTION=False
       - DB_NAME=linksdb
       - DB_USER=links_user
       - DB_PASSWORD=links_user123word
@@ -62,7 +62,7 @@ services:
       - web
       - redis
     environment:
-      - IN_PRODUCTION=True
+      - IN_PRODUCTION=False
       - DB_NAME=linksdb
       - DB_USER=links_user
       - DB_PASSWORD=links_user123word
