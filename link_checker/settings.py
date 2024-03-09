@@ -14,7 +14,7 @@ SECRET_KEY = 'django-insecure-@h11*txvg(u#@hmwl5=7=tly6+x%enyvfoea2(5b@+!fue!t4e
 # SECURITY WARNING: don't run with debug turned on in production!
 
 
-ALLOWED_HOSTS = ['64.23.208.21', '127.0.0.1', 'checker.seodn.com', '0.0.0.0']
+ALLOWED_HOSTS = ['checker.seodn.com', 'www.checker.seodn.com', '0.0.0.0']
 
 
 # Application definition
