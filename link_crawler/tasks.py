@@ -204,3 +204,59 @@ def check_url_index():
         time.sleep(10)  # Pause to avoid overwhelming the server or hitting rate limits
 
     logger.info("Index Checker Task Completed")
+    
+@shared_task
+def check_selected_urls_index(link_ids):
+    logger.info("Selected Index Checker Task Started")  # Task start log
+
+    api_key = cache.get('index_checker_api_key')
+    if not api_key:
+        try:
+            api_key_instance = Index_checker_api.objects.first()
+            if api_key_instance:
+                api_key = api_key_instance.key
+                cache.set('index_checker_api_key', api_key, 3600)
+                logger.info("API key fetched from database and stored in cache.")
+            else:
+                logger.error("API Key is not set in the database.")
+                raise ValueError("API Key is not set in the database.")
+        except Index_checker_api.DoesNotExist:
+            logger.error("API Key model does not exist in the database.")
+            raise ValueError("API Key is not set in the database.")
+    
+    # Only check links that have been specifically selected
+    links_to_check = Link.objects.filter(id__in=link_ids)
+
+    logger.info(f"Total selected links to check: {links_to_check.count()}")
+
+    for link in links_to_check:
+        encoded_target_url = requests.utils.quote(link.link_to, safe='')
+        search_query = f"site:{encoded_target_url}"
+        api_endpoint = f"https://scraping.narf.ai/api/v1/?api_key={api_key}&url=https://www.google.co.uk/search?q={search_query}"
+
+        logger.info(f"Checking index status for selected URL: {link.link_to}")
+
+        response = requests.get(api_endpoint)
+
+        if response.status_code == 200:
+            soup = BeautifulSoup(response.text, 'html.parser')
+            search_div = soup.find('div', id='search')
+
+            if search_div and any(link.link_to in a_tag['href'] for a_tag in search_div.find_all('a', href=True)):
+                link.index_status = Link.index  # Mark as 'Indexed'
+                logger.info(f"URL indexed: {link.link_to}")
+            else:
+                link.index_status = Link.not_index  # Mark as 'Not Indexed'
+                logger.info(f"URL not indexed: {link.link_to}")
+
+            link.last_index_check = now()
+        else:
+            link.index_status = Link.not_index  # Default if error occurs
+            logger.error(f"Failed to check index status for selected URL: {link.link_to}. Response status: {response.status_code}")
+            link.last_index_check = now()
+
+        link.save()
+        logger.info("Selected link status updated and saved.")
+        time.sleep(10)  # Pause to avoid overwhelming the server or hitting rate limits
+
+    logger.info("Selected Index Checker Task Completed")

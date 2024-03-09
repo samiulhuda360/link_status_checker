@@ -126,19 +126,21 @@
             {% endif %}
         </div>
     </div>
+
     <div class="row my-3 additional-actions" style="display: none;">
-        <div class="col-md-3">
-            <select class="form-select" name="action" aria-label="Action Dropdown">
-                <option selected>Select action...</option>
-                <option value="download">Download Selected Links Report</option>
-                <option value="delete">Delete Links</option>
-                <option value="mark_addressed">Mark Addressed</option>
-            </select>
+            <div class="col-md-3">
+                <select class="form-select" name="action" aria-label="Action Dropdown">
+                    <option selected>Select action...</option>
+                    <option value="download">Download Selected Links Report</option>                
+                    <option value="mark_addressed">Mark Addressed</option>
+                    <option value="check_indexation">Manual Index Check</option>
+                    <option value="delete">Delete Links</option>
+                </select>
+            </div>
+    <div class="col-md-2">
+                <button type="submit" class="btn btn-primary">Apply</button>
+            </div>
         </div>
-        <div class="col-md-2">
-            <button type="submit" class="btn btn-primary">Apply</button>
-        </div>
-    </div>
 
     <div class="col text-end"> 
             <p class="me-3"><strong>Total Links:</strong> {{ total_links }}</p>
@@ -250,7 +252,26 @@
                 checkbox.checked = isChecked;
             });
         });
-    
+
+        var actionForm = document.getElementById('select-form');
+        
+        if (actionForm) {
+                actionForm.addEventListener('submit', function(event) {
+                    var action = this.querySelector('[name="action"]').value;
+        
+                    if (action === 'delete') {
+                        var confirmDelete = confirm('Are you sure you want to delete the selected links?');
+                        if (!confirmDelete) {
+                            event.preventDefault();
+                        }
+                    }
+                    // No else needed, if it's not delete, the form will submit normally
+                });
+        } else {
+                console.error('The actionForm does not exist!');
+            }
+            });
+                
         // Event listener for the per-page dropdown
         const perPageDropdown = document.getElementById('dropdownMenuButton');
         perPageDropdown.addEventListener('click', function (event) {
@@ -262,7 +283,6 @@
                 window.location.search = searchParams.toString();
             }
         });
-    });
     
     function setInitialState() {
         var elements = document.querySelectorAll('.checkbox-column, .additional-actions');

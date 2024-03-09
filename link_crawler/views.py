@@ -18,6 +18,7 @@ import os
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.urls import reverse
 from django.utils.timezone import now
+from .tasks import check_selected_urls_index
 
 
 
@@ -96,7 +97,12 @@ def handle_actions(request):
             # Assuming delete_links performs deletion and then returns an HttpResponse object
             return delete_links(request, selected_ids)
         elif action == 'mark_addressed':
-            return mark_links_as_addressed(request, selected_ids)
+            return mark_links_as_addressed(request, selected_ids)        
+        elif action == 'check_indexation':
+            # Trigger the background task for checking indexation of selected links
+            check_selected_urls_index.delay(selected_ids)
+            # Redirect or respond to indicate the task is underway
+            return HttpResponseRedirect(reverse('home'))
         else:
             # If the action is not recognized, redirect to a default page or show an error message
             return HttpResponseRedirect(reverse('home'))
