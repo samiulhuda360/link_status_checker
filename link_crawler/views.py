@@ -48,10 +48,17 @@ def home(request):
 
     # Apply link type filter if provided and not the placeholder
     if link_type and link_type != "Choose...":
-        links_queryset = links_queryset.filter(status_of_link=link_type)
-    
+        if link_type == "Others":
+            links_queryset = links_queryset.exclude(status_of_link__in=["Dofollow", "Nofollow", "Source Removed", "Link Removed"])
+        else:
+            links_queryset = links_queryset.filter(status_of_link=link_type)
+
+    # Apply index status filter if provided and not the placeholder
     if index_status and index_status != "Choose...":
-        links_queryset = links_queryset.filter(index_status=index_status)
+        if index_status == "Others":
+            links_queryset = links_queryset.exclude(index_status__in=["Index", "Not Index"])
+        else:
+            links_queryset = links_queryset.filter(index_status=index_status)
 
     # Apply target link search if provided
     if search_target_link:

@@ -27,6 +27,7 @@
                         <option value="Nofollow" {% if request.GET.linkType == "Nofollow" %}selected{% endif %}>Nofollow</option>
                         <option value="Source Removed" {% if request.GET.linkType == "Source Removed" %}selected{% endif %}>404</option>
                         <option value="Link Removed" {% if request.GET.linkType == "Link Removed" %}selected{% endif %}>Link Removed</option>
+                        <option value="Others" {% if request.GET.linkType == "Others" %}selected{% endif %}>Others</option>
                     </select>
                 </div>
                 <div class="col-md-2">
@@ -35,6 +36,7 @@
                         <option value="Choose..." {% if request.GET.index_status == "" or not request.GET.index_status %}selected{% endif %}>Choose...</option>
                         <option value="Index" {% if request.GET.index_status == "Index" %}selected{% endif %}>Indexed</option>
                         <option value="Not Index" {% if request.GET.index_status == "Not Index" %}selected{% endif %}>Not Indexed</option>
+                        <option value="Others" {% if request.GET.index_status == "Others" %}selected{% endif %}>Others</option>
                     </select>
                 </div>
                 <!-- Filter Button -->
