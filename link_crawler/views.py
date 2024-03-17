@@ -36,7 +36,6 @@ def home(request):
 
     search_target_link = request.GET.get('searchTargetLink', '').strip()
 
-    # Apply date range filter if both dates are provided
     if start_date and end_date:
         try:
             start_date = datetime.strptime(start_date, "%Y-%m-%d").date()
