@@ -98,14 +98,12 @@
             <button type="button" class="toggle-select btn btn-info">Select Links</button>
         </div>
         <!-- Pagination and Rows per page dropdown aligned to the right -->
-        <div class="col-md-6  d-flex justify-content-end">
+        <div class="col-md-6 d-flex justify-content-end">
             <!-- Pagination Previous Button -->
             {% if links.has_previous %}
-                <a href="?page={{ links.previous_page_number }}{% if per_page %}&per_page={{ per_page }}{% endif %}" class="btn btn-outline-secondary me-2">
-                    Previous
-                </a>
+            <a href="?page={{ links.previous_page_number }}{% for filter_name, filter_value in request.GET.items %}{% if filter_name != 'page' %}&{{ filter_name }}={{ filter_value }}{% endif %}{% endfor %}" class="btn btn-outline-secondary me-2">Previous</a>
             {% endif %}
-    
+
             <!-- Rows per page dropdown -->
             <div class="btn-group d-inline-block">
                 <label for="dropdownMenuButton" class="form-label">Rows per page:</label>
@@ -113,21 +111,18 @@
                     {{ per_page }}
                 </button>
                 <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton">
-                    <li><a class="dropdown-item" href="?page=1&per_page=20">20</a></li>
-                    <li><a class="dropdown-item" href="?page=1&per_page=50">50</a></li>
-                    <li><a class="dropdown-item" href="?page=1&per_page=100">100</a></li>
-                    <li><a class="dropdown-item" href="?page=1&per_page=200">200</a></li>
+                    <li><a class="dropdown-item" href="?page=1{% for filter_name, filter_value in request.GET.items %}{% if filter_name != 'page' and filter_name != 'per_page' %}&{{ filter_name }}={{ filter_value }}{% endif %}{% endfor %}&per_page=20">20</a></li>
+                    <li><a class="dropdown-item" href="?page=1{% for filter_name, filter_value in request.GET.items %}{% if filter_name != 'page' and filter_name != 'per_page' %}&{{ filter_name }}={{ filter_value }}{% endif %}{% endfor %}&per_page=50">50</a></li>
+                    <li><a class="dropdown-item" href="?page=1{% for filter_name, filter_value in request.GET.items %}{% if filter_name != 'page' and filter_name != 'per_page' %}&{{ filter_name }}={{ filter_value }}{% endif %}{% endfor %}&per_page=100">100</a></li>
+                    <li><a class="dropdown-item" href="?page=1{% for filter_name, filter_value in request.GET.items %}{% if filter_name != 'page' and filter_name != 'per_page' %}&{{ filter_name }}={{ filter_value }}{% endif %}{% endfor %}&per_page=200">200</a></li>
                 </ul>
             </div>
-    
+
             <!-- Pagination Next Button -->
             {% if links.has_next %}
-                <a href="?page={{ links.next_page_number }}{% if per_page %}&per_page={{ per_page }}{% endif %}" class="btn btn-outline-secondary ms-2">
-                    Next
-                </a>
+            <a href="?page={{ links.next_page_number }}{% for filter_name, filter_value in request.GET.items %}{% if filter_name != 'page' %}&{{ filter_name }}={{ filter_value }}{% endif %}{% endfor %}" class="btn btn-outline-secondary ms-2">Next</a>
             {% endif %}
         </div>
-    </div>
 
     <div class="row my-3 additional-actions" style="display: none;">
             <div class="col-md-3">
