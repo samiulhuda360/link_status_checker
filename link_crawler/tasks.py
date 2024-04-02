@@ -10,6 +10,8 @@ from django.utils.timezone import now
 from datetime import timedelta
 from django.core.cache import cache
 import time
+from urllib.parse import urlparse, urlunparse
+
 
 
 logger = get_task_logger(__name__)
@@ -30,16 +32,22 @@ def inspect_links(target_url, link_to, anchor_text):
         'Accept-Language': 'en-US,en;q=0.9,fr;q=0.8,es;q=0.7',
     }
 
+    # Normalize the link_to URL
+    parsed_url = urlparse(link_to)
+    if not parsed_url.scheme:
+        link_to = urlunparse(('https', parsed_url.netloc, parsed_url.path, parsed_url.params, parsed_url.query, parsed_url.fragment))
+    elif parsed_url.scheme == 'http':
+        link_to = link_to.replace('http://', 'https://', 1)
+
     try:
         result = requests.get(link_to, proxies=proxies, headers=headers, timeout=10)
         logger.info(f"HTTP Status for {link_to}: {result.status_code}")
         if result.status_code >= 400:
             logger.warning(f"Source removed or inaccessible for {link_to} with status code: {result.status_code}")
-            return 'Source Removed', datetime.now().date()
+            return 'Source Removed', datetime.now().date(), link_to
 
         soup = BeautifulSoup(result.text, 'html.parser')
         normalized_target_url = normalize_url(target_url)
-        
         found = False
         for link in soup.find_all('a', href=True):
             href = normalize_url(link['href'])
@@ -53,33 +61,31 @@ def inspect_links(target_url, link_to, anchor_text):
                     break
                 else:
                     logger.debug(f"Anchor text mismatch: found '{link_text}', expected '{anchor_text.lower()}'")
-        
+
         if not found:
             logger.warning(f"Link not found or anchor text mismatch for target URL {target_url}")
-            return 'Link Removed', datetime.now().date()
-        
-        return link_status, datetime.now().date()
+            return 'Link Removed', datetime.now().date(), link_to
+
+        return link_status, datetime.now().date(), link_to
+
     except requests.exceptions.ProxyError as e:
         logger.error(f"Proxy Error while inspecting links: {str(e)}")
-        return 'Source Removed', datetime.now().date()
+        return 'Source Removed', datetime.now().date(), link_to
     except Exception as e:
         logger.error(f"Error while inspecting links: {str(e)}")
-        return 'Error', datetime.now().date()
-    
+        return 'Error', datetime.now().date(), link_to
+
 @shared_task
 def crawl_single_link(link_id):
     link = Link.objects.get(id=link_id)
     if not link.manual_edit:
-        status, last_crawl = inspect_links(link.target_link, link.link_to, link.anchor_text)
-        logger.info(f"Updating link {link.link_to} status to {status} and crawl date to {last_crawl}")
-        
+        status, last_crawl, normalized_link_to = inspect_links(link.target_link, link.link_to, link.anchor_text)
+        logger.info(f"Updating link {link.link_to} status to {status}, crawl date to {last_crawl}, and link_to to {normalized_link_to}")
         link.status_of_link = status
         link.last_crawl_date = last_crawl
-        
-        # If the link status is 'Dofollow', update 'address_status' to 'Blank'
+        link.link_to = normalized_link_to  # Update the link_to field with the normalized URL
         if status == 'Dofollow':
             link.address_status = '-'
-        
         link.save()
         
 two_days_ago = now().date() - timedelta(days=2)

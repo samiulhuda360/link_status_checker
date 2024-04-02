@@ -4,8 +4,8 @@ from django.contrib.auth.models import User
 class Link(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='User', null=True)
     link_created = models.DateField(verbose_name='Link Creation Date')
-    target_link = models.URLField(verbose_name='Target Link', null=True)
-    link_to = models.URLField(verbose_name='Link To')
+    target_link = models.CharField(verbose_name='Target Link', null=True)
+    link_to = models.CharField(verbose_name='Link To')
     anchor_text = models.CharField(max_length=255, verbose_name='Anchor Text')
     
     # Constants for choices
