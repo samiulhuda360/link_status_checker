@@ -47,11 +47,10 @@ def inspect_links(target_url, link_to, anchor_text):
             return 'Source Removed', datetime.now().date(), link_to
 
         soup = BeautifulSoup(result.text, 'html.parser')
-        normalized_target_url = normalize_url(target_url)
         found = False
         for link in soup.find_all('a', href=True):
-            href = normalize_url(link['href'])
-            if href == normalized_target_url:
+            href = link['href']
+            if href == f"{target_url}" or href == f"https://{target_url}" or href == f"http://{target_url}":
                 link_text = link.text.strip().lower()
                 rel = link.get('rel', [])
                 link_status = 'Nofollow' if 'nofollow' in rel else 'Dofollow'
@@ -80,7 +79,7 @@ def crawl_single_link(link_id):
     link = Link.objects.get(id=link_id)
     if not link.manual_edit:
         status, last_crawl, normalized_link_to = inspect_links(link.target_link, link.link_to, link.anchor_text)
-        logger.info(f"Updating link {link.link_to} status to {status}, crawl date to {last_crawl}, and link_to to {normalized_link_to}")
+        logger.info(f"Updating link {link.link_to} status to {status}, crawl date to {last_crawl}, and link_to to {link.target_link}")
         link.status_of_link = status
         link.last_crawl_date = last_crawl
         link.link_to = normalized_link_to  # Update the link_to field with the normalized URL
