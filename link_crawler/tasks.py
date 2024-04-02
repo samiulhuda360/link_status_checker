@@ -108,14 +108,20 @@ def crawl_and_update_links():
 
     # Handle non-blank statuses
     for status, days in non_blank_status_thresholds.items():
+        # Log the status and selected days
+        logger.info(f"Processing status: {status}, Selected days: {days}")
+        
         # Calculate the threshold date for each status
         threshold_date = current_time - timedelta(days=days)
         
         # Fetch links that meet the threshold for non-blank statuses
         links_for_status = Link.objects.filter(
-            last_crawl_date__lt=threshold_date, 
+            last_crawl_date__lt=threshold_date,
             status_of_link=status
         ).values_list('id', flat=True)
+        
+        # Log the link list for the current status
+        logger.info(f"Links for status '{status}': {list(links_for_status)}")
         
         # Extend the list of links to check
         links_to_check_ids.extend(links_for_status)
