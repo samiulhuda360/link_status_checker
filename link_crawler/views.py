@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from openpyxl import Workbook
 from rest_framework import viewsets
 from django.contrib import messages
-from .models import Link
+from .models import Link, Domain_Blogger_Details
 from .serializers import LinkSerializer
 import datetime
 from django.http import HttpResponse, HttpResponseRedirect
@@ -18,7 +18,7 @@ import os
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.urls import reverse
 from django.utils.timezone import now
-from .tasks import check_selected_urls_index
+from .tasks import check_selected_urls_index, send_email
 
 
 
@@ -48,7 +48,7 @@ def home(request):
     # Apply link type filter if provided and not the placeholder
     if link_type and link_type != "Choose...":
         if link_type == "Others":
-            links_queryset = links_queryset.exclude(status_of_link__in=["Dofollow", "Nofollow", "Source Removed", "Link Removed"])
+            links_queryset = links_queryset.exclude(status_of_link__in=["Dofollow", "Nofollow", "404", "Link Removed"])
         else:
             links_queryset = links_queryset.filter(status_of_link=link_type)
 
@@ -108,6 +108,10 @@ def handle_actions(request):
             # Trigger the background task for checking indexation of selected links
             check_selected_urls_index.delay(selected_ids)
             # Redirect or respond to indicate the task is underway
+            return HttpResponseRedirect(reverse('home'))
+        elif action == "send_email":
+            send_email.delay(selected_ids)
+             # Redirect or respond to indicate the task is underway
             return HttpResponseRedirect(reverse('home'))
         else:
             # If the action is not recognized, redirect to a default page or show an error message
@@ -225,6 +229,7 @@ def download_report(request):
 
     return response
 
+
 @require_http_methods(["GET", "POST"])
 @login_required  # Require the user to be logged in to access this view
 def add_links(request):
@@ -286,9 +291,76 @@ def add_links(request):
     return render(request, "link_crawler/add_links.html", {'skipped_rows': skipped_rows})
 
 @login_required
+def add_blogger_details(request):
+    if request.method == 'POST':
+        if 'fileUpload' not in request.FILES:
+            messages.error(request, "No file uploaded.")
+            return redirect('add_blogger_details')
+
+        excel_file = request.FILES.get('fileUpload')
+        if not excel_file.name.endswith('.xlsx'):
+            messages.error(request, "File is not in the format of a .xlsx")
+            return redirect('add_blogger_details')
+
+        skipped_rows = []
+        try:
+            wb = openpyxl.load_workbook(excel_file, data_only=True)
+            sheet = wb.active
+            for index, row in enumerate(sheet.iter_rows(min_row=2, values_only=True), start=2):
+                url = row[0]
+                blogger_name = row[1]
+                blogger_email = row[2]
+
+                # Check if a record with the same url exists
+                exists = Domain_Blogger_Details.objects.filter(url=url).exists()
+                if exists:
+                    skipped_rows.append({
+                        'row': index - 1,
+                        'url': url,
+                        'blogger_name': blogger_name,
+                        'blogger_email': blogger_email,
+                    })
+                else:
+                    Domain_Blogger_Details.objects.create(
+                        url=url,
+                        blogger_name=blogger_name,
+                        blogger_email=blogger_email
+                    )
+
+            if skipped_rows:
+                request.session['skipped_rows'] = skipped_rows
+                messages.warning(request, "Some rows were skipped due to duplicates.")
+            else:
+                messages.success(request, "Excel file processed successfully")
+        except Exception as e:
+            messages.error(request, f"An error occurred: {str(e)}")
+            return redirect('add_blogger_details')
+
+        skipped_rows = request.session.pop('skipped_rows', None)
+        return render(request, "link_crawler/add_blogger_details.html", {'skipped_rows': skipped_rows})
+
+    return render(request, "link_crawler/add_blogger_details.html")
+
+@login_required
 def download_excel_template(request):
     # Define the path to the Excel file
     file_path = os.path.join(settings.BASE_DIR, 'links_upload_format.xlsx')
+    
+    # Check if file exists
+    if os.path.exists(file_path):
+        with open(file_path, 'rb') as fh:
+            response = HttpResponse(fh.read(), content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+            response['Content-Disposition'] = 'attachment; filename="links_upload_format.xlsx"'
+            return response
+    else:
+        # You can return an HTTP 404 response if the file is not found
+        # Or handle it some other way if you prefer
+        return HttpResponse("The requested Excel template was not found.", status=404)
+    
+@login_required
+def download_excel_template_blogger(request):
+    # Define the path to the Excel file
+    file_path = os.path.join(settings.BASE_DIR, 'links_upload_format_blogger.xlsx')
     
     # Check if file exists
     if os.path.exists(file_path):

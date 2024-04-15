@@ -128,6 +128,7 @@
             <div class="col-md-3">
                 <select class="form-select" name="action" aria-label="Action Dropdown">
                     <option selected>Select action...</option>
+                    <option value="send_email">Send Email to Site Owner</option>
                     <option value="download">Download Selected Links Report</option>                
                     <option value="mark_addressed">Mark Addressed</option>
                     <option value="check_indexation">Manual Index Check</option>
@@ -159,6 +160,7 @@
                         <th scope="col" class="thin-column">Link Created</th>
                         <th scope="col" class="thin-column">Last Crawled</th>
                         <th scope="col" class="thin-column">Is Indexed?</th>
+                        <th scope="col" class="thin-column">Last Email Sent</th>                        
                         <th scope="col" class="thin-column">Addressed?</th>
                     </tr>
                 </thead>
@@ -175,7 +177,7 @@
                             <span class="status-dot green-dot"></span>Dofollow
                             {% elif link.get_status_of_link_display == "Nofollow" %}
                             <span class="status-dot red-dot"></span>Nofollow
-                            {% elif link.get_status_of_link_display == "Source Removed" %}
+                            {% elif link.get_status_of_link_display == "404" %}
                             <span class="status-icon">&#9760;</span>404
                             {% elif link.get_status_of_link_display == "Link Removed" %}
                             <span class="status-icon">&#x1F630;</span>Link Removed
@@ -206,7 +208,14 @@
                             {% else %}
                             Addressed
                             {% endif %}
-                        </td>                     
+                        </td>                        
+                        <td style="text-align: center; vertical-align: middle;">
+                            {% if link.last_email_sent %}
+                                {{ link.last_email_sent }}
+                            {% else %}
+                                --
+                            {% endif %}
+                        </td>                   
                     </tr>                    
                     {% empty %}
                     <tr>

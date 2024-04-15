@@ -3,7 +3,7 @@ from datetime import datetime
 import requests
 from bs4 import BeautifulSoup
 from django.db.models import Q
-from .models import Link, LinkStatusThreshold, Index_checker_api
+from .models import Link, LinkStatusThreshold, Index_checker_api, Email_api, Domain_Blogger_Details
 from celery.utils.log import get_task_logger
 from celery import group
 from django.utils.timezone import now
@@ -11,6 +11,9 @@ from datetime import timedelta
 from django.core.cache import cache
 import time
 from urllib.parse import urlparse, urlunparse
+import json
+from .email_templates import get_html_content_404, get_html_content_link_removed, get_html_content_nofollow
+import tldextract
 
 
 
@@ -44,7 +47,7 @@ def inspect_links(target_url, link_to, anchor_text):
         logger.info(f"HTTP Status for {link_to}: {result.status_code}")
         if result.status_code >= 400:
             logger.warning(f"Source removed or inaccessible for {link_to} with status code: {result.status_code}")
-            return 'Source Removed', datetime.now().date(), link_to
+            return '404', datetime.now().date(), link_to
 
         soup = BeautifulSoup(result.text, 'html.parser')
         found = False
@@ -69,7 +72,7 @@ def inspect_links(target_url, link_to, anchor_text):
 
     except requests.exceptions.ProxyError as e:
         logger.error(f"Proxy Error while inspecting links: {str(e)}")
-        return 'Source Removed', datetime.now().date(), link_to
+        return '404', datetime.now().date(), link_to
     except Exception as e:
         logger.error(f"Error while inspecting links: {str(e)}")
         return 'Error', datetime.now().date(), link_to
@@ -275,3 +278,91 @@ def check_selected_urls_index(link_ids):
         time.sleep(10)  # Pause to avoid overwhelming the server or hitting rate limits
 
     logger.info("Selected Index Checker Task Completed")
+    
+
+@shared_task
+def send_email(link_ids):
+    # Set the request data
+    email_api_key = cache.get('email_api_key')
+    if not email_api_key:
+            try:
+                email_api_key_instance = Email_api.objects.first()
+                if email_api_key_instance:
+                    email_api_key = email_api_key_instance.key
+                    cache.set('email_api_key', email_api_key, 3600)
+                    logger.info("Email API key fetched from database and stored in cache.")
+                else:
+                    logger.error("Email Key is not set in the database.")
+                    raise ValueError("Email Key is not set in the database.")
+            except Email_api.DoesNotExist:
+                logger.error("Email Key model does not exist in the database.")
+                raise ValueError("Email Key is not set in the database.")
+            
+    email_to_send = Link.objects.filter(id__in=link_ids)
+
+    for link in email_to_send:
+        extracted = tldextract.extract(link.link_to)
+        domain_match = f"{extracted.domain}.{extracted.suffix}"
+        print(domain_match)
+        domain_list = Domain_Blogger_Details.objects.values_list('domain', flat=True).distinct()
+        print(list(domain_list))
+        blogger_details = Domain_Blogger_Details.objects.filter(domain=domain_match).first()
+        if blogger_details:
+            recipient = {
+                'name': blogger_details.blogger_name,
+                'email': blogger_details.blogger_email
+            }
+
+            logger.error("LINK STATUS", link.status_of_link)
+            if link.status_of_link == '404':
+                subject = "Backlink 404 Error"
+                html_content = get_html_content_404(link.target_link, link.link_to, link.anchor_text)
+            elif link.status_of_link == 'Link Removed':
+                subject = "Backlink Removed"
+                html_content = get_html_content_link_removed(link.target_link, link.link_to, link.anchor_text)
+            elif link.status_of_link == 'Nofollow':
+                subject = "Backlink Nofollow"
+                html_content = get_html_content_nofollow(link.target_link, link.link_to, link.anchor_text)
+            else:
+                subject = "Backlink Another Issue"
+                html_content = "Another Issue"
+
+            sender = {
+                'name': 'Search Combat Team',
+                'email': 'directors@searchcombat.com'
+            }
+
+            data = {
+                'sender': sender,
+                'to': [recipient],
+                'subject': subject,
+                'htmlContent': html_content
+            }
+
+            # Set the request headers
+            headers = {
+                'accept': 'application/json',
+                'api-key': email_api_key,
+                'content-type': 'application/json'
+            }
+
+            # Send the POST request
+            response = requests.post(
+                'https://api.brevo.com/v3/smtp/email',
+                headers=headers,
+                data=json.dumps(data)
+            )
+
+            # Check the response status code
+            if response.status_code == 201:
+                print('Email sent successfully!')
+                print(f'Message ID: {response.json()["messageId"]}')
+                # Update the last_email_sent field with the current date
+                link.last_email_sent = datetime.now().date()
+                link.save()
+            else:
+                print(f'Error: {response.status_code} - {response.text}')
+        else:
+            logger.error("Sending Error, no blogger details")
+            continue
+

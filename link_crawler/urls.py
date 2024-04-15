@@ -14,6 +14,8 @@ urlpatterns = [
     path('api/', include(router.urls)),
     path('download_report/', views.download_report, name='download_report'),
     path('download-excel-template/', views.download_excel_template, name='download_excel_template'),
+    path('download-excel-template-blooger/', views.download_excel_template_blogger, name='download_excel_template_blogger'),
+    path('add-blogger-details/', views.add_blogger_details, name='add_blogger_details'),
     path('handle-actions/', views.handle_actions, name='handle_actions'),
     path('logout/', LogoutView.as_view(next_page='home'), name='logout'),
 ]
