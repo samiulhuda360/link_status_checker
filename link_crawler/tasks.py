@@ -351,10 +351,11 @@ def send_email(link_ids):
                 data=json.dumps(data)
             )
 
-            # Check the response status code
+           # Check the response status code
             if response.status_code == 201:
                 print('Email sent successfully!')
                 print(f'Message ID: {response.json()["messageId"]}')
+
                 # Update the last_email_sent field with the current date
                 link.last_email_sent = datetime.now().date()
                 link.save()
