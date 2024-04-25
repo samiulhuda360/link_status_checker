@@ -313,7 +313,7 @@ def send_email(link_ids):
                 'email': blogger_details.blogger_email
             }
 
-            logger.error("LINK STATUS", link.status_of_link)
+            logger.error("LINK STATUS: %s", link.status_of_link)
             if link.status_of_link == '404':
                 subject = "Backlink 404 Error"
                 html_content = get_html_content_404(link.target_link, link.link_to, link.anchor_text)
