@@ -15,14 +15,12 @@ class Link(models.Model):
     nofollow = 'Nofollow'
     source_removed = '404'  # Updated value to '404'
     link_removed = 'Link Removed'
-    Index_Check_Interval = 'Index_Check_Interval'
 
     STATUS_CHOICES = [
         (dofollow, 'Dofollow'),
         (nofollow, 'Nofollow'),
         (source_removed, '404'),  # Updated value to '404'
         (link_removed, 'Link Removed'),
-        (Index_Check_Interval, 'Index_Check_Interval'),
     ]
     status_of_link = models.CharField(
         max_length=25,
@@ -69,9 +67,24 @@ class Link(models.Model):
         ]
         
 class LinkStatusThreshold(models.Model):
-    status = models.CharField(max_length=25, choices=Link.STATUS_CHOICES, verbose_name='Link Status')
+    # Constants for choices
+    dofollow = 'Dofollow'
+    nofollow = 'Nofollow'
+    source_removed = '404'
+    link_removed = 'Link Removed'
+    Index_Check_Interval = 'Index_Check_Interval'
+    
+    STATUS_CHOICES = [
+        (dofollow, 'Dofollow'),
+        (nofollow, 'Nofollow'),
+        (source_removed, '404'),
+        (link_removed, 'Link Removed'),
+        (Index_Check_Interval, 'Index_Check_Interval'),
+    ]
+    
+    status = models.CharField(max_length=25, choices=STATUS_CHOICES, verbose_name='Link Status')
     days_threshold = models.IntegerField(default=2, verbose_name='Days Threshold')
-
+    
     def __str__(self):
         return f"{self.status}: {self.days_threshold} days"
 
