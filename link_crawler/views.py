@@ -85,7 +85,12 @@ def home(request):
         'links': links,
         'per_page': per_page,
         'current_page': int(page),
-        'total_links': total_links, 
+        'total_links': total_links,
+        'start_date': start_date,
+        'end_date': end_date,
+        'link_type': link_type,
+        'index_status': index_status,
+        'search_target_link': search_target_link,
     })
     
     
