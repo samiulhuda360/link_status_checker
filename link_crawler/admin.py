@@ -29,7 +29,7 @@ class ApiKeyAdmin(admin.ModelAdmin):
     
 @admin.register(Email_api)
 class Email_apiAdmin(admin.ModelAdmin):
-    list_display = ('key',)
+    list_display = ('sender_name', 'sender_email', 'key')
 
     def has_add_permission(self, request, obj=None):
         # Disable addition of new objects if one already exists

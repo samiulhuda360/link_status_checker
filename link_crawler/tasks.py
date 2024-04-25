@@ -323,13 +323,11 @@ def send_email(link_ids):
             elif link.status_of_link == 'Nofollow':
                 subject = "Backlink Nofollow"
                 html_content = get_html_content_nofollow(link.target_link, link.link_to, link.anchor_text)
-            else:
-                subject = "Backlink Another Issue"
-                html_content = "Another Issue"
 
+            email_api = Email_api.objects.first()
             sender = {
-                'name': 'Search Combat Team',
-                'email': 'directors@searchcombat.com'
+                'name': email_api.sender_name,
+                'email': email_api.sender_email
             }
 
             data = {

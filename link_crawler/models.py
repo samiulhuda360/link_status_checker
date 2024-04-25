@@ -84,13 +84,15 @@ class Index_checker_api(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return "API Key"
+        return "Index Checker API"
 
     class Meta:
-        verbose_name_plural = "API Key"
+        verbose_name_plural = "Index Checker API"
         
 class Email_api(models.Model):
     key = models.CharField(max_length=255, unique=True)
+    sender_name = models.CharField(max_length=255, default='Search Combat Team')
+    sender_email = models.EmailField(default='directors@searchcombat.com')
 
     def save(self, *args, **kwargs):
         if Email_api.objects.exists() and not self.pk:
@@ -98,10 +100,10 @@ class Email_api(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return "Email Api Key"
+        return "Email Sender Details"
 
     class Meta:
-        verbose_name_plural = "Email Api Key"
+        verbose_name_plural = "Email Sender Details"
         
 class Domain_Blogger_Details(models.Model):
     url = models.URLField()
