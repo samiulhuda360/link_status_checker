@@ -160,8 +160,8 @@
                         <th scope="col" class="thin-column">Link Created</th>
                         <th scope="col" class="thin-column">Last Crawled</th>
                         <th scope="col" class="thin-column">Is Indexed?</th>
+                        <th scope="col" class="thin-column">Last Index Checked</th>
                         <th scope="col" class="thin-column">Last Email Sent</th>                        
-                        <th scope="col" class="thin-column">Addressed?</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -201,7 +201,14 @@
                             {% else %}
                             Not Checked
                             {% endif %}
-                        </td>                      
+                        </td>
+                        <td style="text-align: center; vertical-align: middle;">
+                            {% if link.last_index_check %}
+                            {{ link.last_index_check|date:"Y-m-d" }}
+                            {% else %}
+                                --
+                            {% endif %}
+                        </td>                   
                         <td style="text-align: center; vertical-align: middle;">
                             {% if link.last_email_sent %}
                             {{ link.last_email_sent|date:"Y-m-d" }}
