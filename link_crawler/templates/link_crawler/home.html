@@ -201,14 +201,7 @@
                             {% else %}
                             Not Checked
                             {% endif %}
-                        </td>
-                        <td style="text-align: center; vertical-align: middle;">
-                            {% if link.address_status == "-" %}
-                            --
-                            {% else %}
-                            Addressed
-                            {% endif %}
-                        </td>                        
+                        </td>                      
                         <td style="text-align: center; vertical-align: middle;">
                             {% if link.last_email_sent %}
                             {{ link.last_email_sent|date:"Y-m-d" }}
