@@ -26,7 +26,7 @@ from .tasks import check_selected_urls_index, send_email
 @login_required
 def home(request):
     # Start with the base queryset
-    links_queryset = Link.objects.filter(user=request.user).order_by('-link_created')    
+    links_queryset = Link.objects.filter(user=request.user).order_by('-last_index_check', '-link_created')    
     # Retrieve filter/search parameters
     start_date = request.GET.get('startDate', '').strip()
     end_date = request.GET.get('endDate', '').strip()
