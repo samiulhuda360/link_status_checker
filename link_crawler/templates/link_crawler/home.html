@@ -25,7 +25,7 @@
                         <option value="Choose..." {% if request.GET.linkType == "" or not request.GET.linkType %}selected{% endif %}>Choose...</option>
                         <option value="Dofollow" {% if request.GET.linkType == "Dofollow" %}selected{% endif %}>Dofollow</option>
                         <option value="Nofollow" {% if request.GET.linkType == "Nofollow" %}selected{% endif %}>Nofollow</option>
-                        <option value="Source Removed" {% if request.GET.linkType == "404" %}selected{% endif %}>404</option>
+                        <option value="404" {% if request.GET.linkType == "404" %}selected{% endif %}>404</option>
                         <option value="Link Removed" {% if request.GET.linkType == "Link Removed" %}selected{% endif %}>Link Removed</option>
                         <option value="Others" {% if request.GET.linkType == "Others" %}selected{% endif %}>Others</option>
                     </select>
