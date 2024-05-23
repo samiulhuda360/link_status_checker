@@ -204,9 +204,14 @@ def download_report(request):
     headers = ['Target Link', 'Link To', 'Anchor Text', 'Status Of Link', 'Index Status', 'Link Created', 'Last Crawl Date']
     ws.append(headers)
 
-    # Retrieve the links based on the user's selection or all links
-    # Here, you may add filtering based on request parameters
-    links = Link.objects.all()
+    # Retrieve the filter parameter from the request
+    status_filter = request.GET.get('status', None)
+
+    # Filter links based on the status parameter
+    if status_filter:
+        links = Link.objects.filter(status_of_link=status_filter)
+    else:
+        links = Link.objects.all()
 
     for link in links:
         # Prepare the data row for each link
