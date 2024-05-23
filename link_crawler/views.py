@@ -204,8 +204,8 @@ def download_report(request):
     headers = ['Target Link', 'Link To', 'Anchor Text', 'Status Of Link', 'Index Status', 'Link Created', 'Last Crawl Date']
     ws.append(headers)
 
-    # Retrieve the filter parameter from the request
-    status_filter = request.GET.get('status', None)
+    # Retrieve the filter parameter from the request using the correct parameter name
+    status_filter = request.GET.get('report_type', None)  # Corrected from 'status' to 'report_type'
 
     # Filter links based on the status parameter
     if status_filter:
@@ -238,6 +238,7 @@ def download_report(request):
     wb.save(response)
 
     return response
+
 
 
 @require_http_methods(["GET", "POST"])
