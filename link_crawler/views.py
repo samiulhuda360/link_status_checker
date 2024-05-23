@@ -98,7 +98,6 @@ def home(request):
 def handle_actions(request):
     if request.method == 'POST':
         action = request.POST.get('action')
-        print(action)
         selected_ids = request.POST.getlist('selected_links')
 
         if action == 'download':
@@ -201,17 +200,15 @@ def download_report(request):
     ws.append(headers)
 
     status_filter = request.GET.get('report_type', None)
-    print("Requested Status Filter:", status_filter)  # Debug print
 
     if status_filter:
-        if status_filter in ["indexed", "not_indexed"]:
+        if status_filter == "Index" or status_filter == "Not Index":
             links = Link.objects.filter(index_status=status_filter)
         else:
             links = Link.objects.filter(status_of_link=status_filter)
     else:
         links = Link.objects.all()
 
-    print("Number of links found:", len(links))  # Debug print
 
     for link in links:
         data_row = [
