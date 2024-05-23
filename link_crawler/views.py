@@ -193,51 +193,45 @@ class LinkViewSet(viewsets.ModelViewSet):
 
 @login_required
 def download_report(request):
-    # Create a new Excel workbook and select the active worksheet
     wb = Workbook()
     ws = wb.active
-
-    # Set the title for the worksheet
     ws.title = "Links Report"
 
-    # Set the header row
     headers = ['Target Link', 'Link To', 'Anchor Text', 'Status Of Link', 'Index Status', 'Link Created', 'Last Crawl Date']
     ws.append(headers)
 
-    # Retrieve the filter parameter from the request using the correct parameter name
-    status_filter = request.GET.get('report_type', None)  # Corrected from 'status' to 'report_type'
+    status_filter = request.GET.get('report_type', None)
+    print("Requested Status Filter:", status_filter)  # Debug print
 
-    # Filter links based on the status parameter
     if status_filter:
-        links = Link.objects.filter(status_of_link=status_filter)
+        if status_filter in ["indexed", "not_indexed"]:
+            links = Link.objects.filter(index_status=status_filter)
+        else:
+            links = Link.objects.filter(status_of_link=status_filter)
     else:
         links = Link.objects.all()
 
+    print("Number of links found:", len(links))  # Debug print
+
     for link in links:
-        # Prepare the data row for each link
         data_row = [
             link.target_link,
             link.link_to,
             link.anchor_text,
-            link.get_status_of_link_display(),  # This will fetch the human-readable value for the 'status_of_link' choice
-            link.get_index_status_display(),    # Similarly, this fetches the readable value for 'index_status'
+            link.get_status_of_link_display(),
+            link.get_index_status_display(),
             link.link_created.strftime('%Y-%m-%d') if link.link_created else 'N/A',
             link.last_crawl_date.strftime('%Y-%m-%d') if link.last_crawl_date else 'N/A',
         ]
         ws.append(data_row)
 
-    # Set the name of the Excel file
     filename = f"Links_Report_{now().strftime('%Y-%m-%d')}.xlsx"
-
-    # Create a HTTP response with content type as Excel
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-    # Set the content disposition to attachment to force download
     response['Content-Disposition'] = f'attachment; filename={filename}'
-
-    # Save the Excel file to the response
     wb.save(response)
 
     return response
+
 
 
 
