@@ -1,4 +1,4 @@
-def get_html_content_404(target_link, link_to, anchor_text):
+def get_html_content_404(target_link, link_to, anchor_text, sender_name, sender_company):
     return f"""
     <!DOCTYPE html>
     <html>
@@ -69,14 +69,14 @@ def get_html_content_404(target_link, link_to, anchor_text):
             <p>Thank you for your cooperation.</p>
             <br>
             <p>Best regards,</p>
-            <p>Rohin<br>Seach Combat</p>
+            <p>{sender_name}<br>{sender_company}</p>
 
         </div>
     </body>
     </html>
     """
     
-def get_html_content_link_removed(target_link, link_to, anchor_text):
+def get_html_content_link_removed(target_link, link_to, anchor_text, sender_name, sender_company):
     return f"""
     <!DOCTYPE html>
     <html>
@@ -146,13 +146,13 @@ def get_html_content_link_removed(target_link, link_to, anchor_text):
             <p>If there are any specific reasons for the link removal or if you have any concerns, please let us know. We are open to discussing any issues and finding a mutually beneficial solution.</p>
             <p>Thank you for your attention to this matter. We look forward to hearing back from you soon.</p>
             <p>Best regards,</p>
-            <p>Rohin<br>Seach Combat</p>
+            <p>{sender_name}<br>{sender_company}</p>
         </div>
     </body>
     </html>
     """
     
-def get_html_content_nofollow(target_link, link_to, anchor_text):
+def get_html_content_nofollow(target_link, link_to, anchor_text, sender_name, sender_company):
     return f"""
     <!DOCTYPE html>
     <html>
@@ -223,8 +223,7 @@ def get_html_content_nofollow(target_link, link_to, anchor_text):
             <p>Thank you for your attention to this matter. We look forward to your favorable response.</p>
             <br>
             <p>Best regards,</p>
-            <p>Rohin<br>Seach Combat</p>
-
+            <p>{sender_name}<br>{sender_company}</p>
         </div>
     </body>
     </html>

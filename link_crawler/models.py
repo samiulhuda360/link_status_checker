@@ -104,8 +104,9 @@ class Index_checker_api(models.Model):
         
 class Email_api(models.Model):
     key = models.CharField(max_length=255, unique=True)
-    sender_name = models.CharField(max_length=255, default='Search Combat Team')
+    sender_name = models.CharField(max_length=100, default='Rohin Dua')
     sender_email = models.EmailField(default='directors@searchcombat.com')
+    sender_company = models.CharField(max_length=100, default='Search Combat Team')
 
     def save(self, *args, **kwargs):
         if Email_api.objects.exists() and not self.pk:

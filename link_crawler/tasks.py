@@ -315,17 +315,19 @@ def send_email(link_ids):
                 'name': blogger_details.blogger_name,
                 'email': blogger_details.blogger_email
             }
+            sender_name = email_api.sender_name,
+            sender_company = email_api.sender_company
 
             logger.error("LINK STATUS: %s", link.status_of_link)
             if link.status_of_link == '404':
                 subject = "Backlink 404 Error"
-                html_content = get_html_content_404(link.target_link, link.link_to, link.anchor_text)
+                html_content = get_html_content_404(link.target_link, link.link_to, link.anchor_text, sender_name, sender_company)
             elif link.status_of_link == 'Link Removed':
                 subject = "Backlink Removed"
-                html_content = get_html_content_link_removed(link.target_link, link.link_to, link.anchor_text)
+                html_content = get_html_content_link_removed(link.target_link, link.link_to, link.anchor_text, sender_name, sender_company)
             elif link.status_of_link == 'Nofollow':
                 subject = "Backlink Nofollow"
-                html_content = get_html_content_nofollow(link.target_link, link.link_to, link.anchor_text)
+                html_content = get_html_content_nofollow(link.target_link, link.link_to, link.anchor_text, sender_name, sender_company)
 
             email_api = Email_api.objects.first()
             sender = {
