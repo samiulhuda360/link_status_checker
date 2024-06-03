@@ -55,28 +55,28 @@ body {
 .table thead {
   background: linear-gradient(to right, #903ad2, #a55d2a, #00ffb7);
   color: #fff;
-  margin-bottom:5px;
 }
 
 .table thead th {
   border: 0.3px solid #8d320bf2;
   text-shadow: 0px 0px 3px rgba(0,0,0,0.6);
   vertical-align: top;
-  min-width: 100px; /* Ensures a minimum width for all headers */
+  min-width: 120px; /* Ensures a minimum width for all headers */
 }
 
 .table th.thin-column {
-  width: 100px; 
+  width: 120px; 
 }
 
 .table td, .table th {
   text-overflow: ellipsis;
   white-space: nowrap;
   overflow: hidden;
+  max-width: 150px; /* Maximum width for table cells */
 }
 
 .table td.thin-column {
-  padding: 2px 5px; /* Custom padding for thin column cells */
+  padding: 4px 8px; /* Custom padding for thin column cells */
 }
 
 .table td.no-data {
@@ -94,22 +94,20 @@ body {
 }
 
 .table tr td:nth-last-child(-n+3) {
-  padding-left: 3px; 
-  padding-right: 3px; 
+  padding-left: 4px; 
+  padding-right: 4px; 
 }
 
+/* Ensures the SVG icon is always visible next to the text */
 .table .link-container {
   display: flex;
   align-items: center;
 }
 
 .table .link-container svg {
-  margin-left: 2px;
-  margin-right: 2px;
+  margin-left: 5px;
   flex-shrink: 0;
-  visibility: visible; /* Ensure SVG is visible */
 }
-
 
 
 

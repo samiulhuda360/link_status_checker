@@ -55,7 +55,6 @@ body {
 .table thead {
   background: linear-gradient(to right, #903ad2, #a55d2a, #00ffb7);
   color: #fff;
-  margin-bottom:5px;
 }
 
 .table thead th {
@@ -104,8 +103,8 @@ body {
 }
 
 .table .link-container svg {
-  margin-left: 2px;
-  margin-right: 2px;
+  margin-left: 3px;
+  margin-right: 3px;
   flex-shrink: 0;
   visibility: visible; /* Ensure SVG is visible */
 }

@@ -3,13 +3,16 @@ body {
   font-size: 13px;
   background-color: #d2e6d7;
 }
+
 .navbar-custom {
   background: linear-gradient(45deg, #000, #a52a2a, #ffd700);
 }
+
 .nav-link {
   color: #fff !important;
   transition: color 0.3s ease-in-out;
 }
+
 .nav-link:hover {
   color: #ccc !important;
 }
@@ -55,28 +58,28 @@ body {
 .table thead {
   background: linear-gradient(to right, #903ad2, #a55d2a, #00ffb7);
   color: #fff;
-  margin-bottom:5px;
 }
 
 .table thead th {
   border: 0.3px solid #8d320bf2;
   text-shadow: 0px 0px 3px rgba(0,0,0,0.6);
   vertical-align: top;
-  min-width: 100px; /* Ensures a minimum width for all headers */
+  min-width: 120px; /* Ensures a minimum width for all headers */
 }
 
 .table th.thin-column {
-  width: 100px; 
+  width: 120px; 
 }
 
 .table td, .table th {
   text-overflow: ellipsis;
   white-space: nowrap;
   overflow: hidden;
+  max-width: 150px; /* Maximum width for table cells */
 }
 
 .table td.thin-column {
-  padding: 2px 5px; /* Custom padding for thin column cells */
+  padding: 4px 8px; /* Custom padding for thin column cells */
 }
 
 .table td.no-data {
@@ -94,24 +97,20 @@ body {
 }
 
 .table tr td:nth-last-child(-n+3) {
-  padding-left: 3px; 
-  padding-right: 3px; 
+  padding-left: 4px; 
+  padding-right: 4px; 
 }
 
-.table .link-container {
+.table td {
   display: flex;
   align-items: center;
+  justify-content: flex-start; /* Ensure items align properly to the left */
 }
 
-.table .link-container svg {
-  margin-left: 2px;
-  margin-right: 2px;
+.table td svg {
+  margin-left: 5px;
   flex-shrink: 0;
-  visibility: visible; /* Ensure SVG is visible */
 }
-
-
-
 
 .status-dot {
   height: 10px;
@@ -134,7 +133,7 @@ body {
   font-weight: 500;
   vertical-align: middle;
   margin-right: 4px;
-  color:red;
+  color: red;
 }
 
 .upload-form {
@@ -144,6 +143,7 @@ body {
   display: flex;
   align-items: center;
 }
+
 .upload-button {
   background-color: #4CAF50;
   color: white;
@@ -152,6 +152,7 @@ body {
   border-radius: 4px;
   cursor: pointer;
 }
+
 .download-button {
   background-color: #FFA500; /* Yellowish-orange */
   color: white;
@@ -162,6 +163,7 @@ body {
   text-decoration: none;
   display: inline-block;
 }
+
 .centered-flex {
   display: flex;
   align-items: center;

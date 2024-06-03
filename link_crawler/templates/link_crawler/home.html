@@ -153,8 +153,8 @@
                             <input type="checkbox" id="selectAll" /> 
                         </th>
                         <th scope="col" style="width: 60px;">S.No</th>
-                        <th scope="col">Target Link</th>
-                        <th scope="col">Referring Page</th>
+                        <th scope="col" style="width: 170px;">Target Link</th>
+                        <th scope="col" style="width: 210px;">Referring Page</th>
                         <th scope="col">Anchor Text</th>
                         <th scope="col" class="thin-column">Status of Link</th>
                         <th scope="col" class="thin-column">Link Created</th>
@@ -169,8 +169,26 @@
                     <tr>
                         <td class="checkbox-column" style="width: 50px;"><input type="checkbox" name="selected_links" value="{{ link.id }}"></td>
                         <th scope="row">{{ forloop.counter }}</th>
-                        <td title="{{ link.target_link }}">{{ link.target_link }}</td>
-                        <td title="{{ link.link_to }}">{{ link.link_to }}</td>
+                        <td title="{{ link.target_link }}">
+                            <span class="link-container">
+                                {{ link.target_link }}
+                                <a href="{{ link.target_link }}" target="_blank">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false">
+                                        <path d="M19.5 4.5h-7V6h4.44l-5.97 5.97 1.06 1.06L18 7.06v4.44h1.5v-7Zm-13 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-3H17v3a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h3V5.5h-3Z"></path>
+                                    </svg>
+                                </a>
+                            </span>
+                        </td>
+                        <td title="{{ link.link_to }}">
+                            <span class="link-container">
+                                {{ link.link_to }}
+                                <a href="{{ link.link_to }}" target="_blank">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false">
+                                        <path d="M19.5 4.5h-7V6h4.44l-5.97 5.97 1.06 1.06L18 7.06v4.44h1.5v-7Zm-13 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-3H17v3a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h3V5.5h-3Z"></path>
+                                    </svg>
+                                </a>
+                            </span>
+                        </td>
                         <td>{{ link.anchor_text }}</td>
                         <td>
                             {% if link.get_status_of_link_display == "Dofollow" %}
@@ -180,7 +198,7 @@
                             {% elif link.get_status_of_link_display == "404" %}
                             <span class="status-icon">&#9760;</span>404
                             {% elif link.get_status_of_link_display == "Link Removed" %}
-                            <span class="status-icon">&#x1F630;</span>Link Removed
+                            <span class="status-icon">&#x1F630;"></span>Link Removed
                             {% else %}
                             Status Unknown
                             {% endif %}
@@ -224,6 +242,7 @@
                     {% endfor %}
                 </tbody>
             </table>
+                                                         
         </div>
     </div>
 </form>
