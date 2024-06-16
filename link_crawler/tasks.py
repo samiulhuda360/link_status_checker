@@ -177,7 +177,7 @@ def check_url_index():
             logger.error("API Key model does not exist in the database.")
             raise ValueError("API Key is not set in the database.")
     
-    # Fetching the index check interval
+    # the index check interval
     try:
         interval_entry = LinkStatusThreshold.objects.get(status="Index_Check_Interval")
         days_threshold = interval_entry.days_threshold

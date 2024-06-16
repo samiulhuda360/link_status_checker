@@ -10,6 +10,7 @@ services:
       - POSTGRES_DB=linksdb
       - POSTGRES_USER=links_user
       - POSTGRES_PASSWORD=links_user123word
+
   redis:
     image: "redis:alpine"
     command: redis-server --maxmemory 300mb --maxmemory-policy allkeys-lru
