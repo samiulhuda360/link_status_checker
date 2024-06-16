@@ -98,10 +98,10 @@ body {
   padding-right: 3px; 
 }
 
-.table .link-container {
+/* .table .link-container {
   display: flex;
   align-items: center;
-}
+} */
 
 .table .link-container svg {
   margin-left: 2px;
