@@ -15,7 +15,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy project
 COPY . /app/
 
-# Copy the entrypoint script into the container
+# Copy the entrypoint script into theS
 COPY entrypoint.sh /app/entrypoint.sh
 
 # Set the entrypoint script to be executable
