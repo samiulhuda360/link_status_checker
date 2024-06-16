@@ -164,3 +164,4 @@ cython_debug/
 
 nginx.conf
 .nginx.conf
+/link_checker/settings.py
