@@ -9,7 +9,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'link_checker.settings')
 app = Celery('link_checker')
 app.config_from_object('django.conf:settings', namespace='CELERY')
 
-## Explicitly set broker connection retries on startup
+## set broker connection retries on startup
 app.conf.broker_connection_retry_on_startup = True
 
 app.autodiscover_tasks()
