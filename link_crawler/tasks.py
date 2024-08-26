@@ -27,8 +27,8 @@ def normalize_url(url):
 def inspect_links(target_url, link_to, anchor_text):
     logger.info(f"Inspecting link: {link_to} targeting {target_url} with anchor text '{anchor_text}'")
     proxies = {
-        "http": "http://letezcbn-rotate:6792gwkuo8oo@p.webshare.io:80/",
-        "https": "http://letezcbn-rotate:6792gwkuo8oo@p.webshare.io:80/"
+        "http": "http://elxjiifi-rotate:pa23s9wa8992@p.webshare.io:80/",
+        "https": "http://elxjiifi-rotate:pa23s9wa8992@p.webshare.io:80/"
     }
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
